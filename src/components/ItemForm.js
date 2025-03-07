@@ -87,7 +87,7 @@ function ItemForm({ area, onItemAdded, onCancel }) {
           <button type="submit" disabled={submitting}>
             {submitting ? "Salvando..." : "Salvar Item"}
           </button>
-          <button type="button" onClick={onCancel}>
+          <button type="button" class="cancel-btn" onClick={onCancel}>
             Cancelar
           </button>
         </div>

@@ -95,7 +95,7 @@ function OptionForm({ item, onOptionAdded, onCancel }) {
           <button type="submit" disabled={submitting}>
             {submitting ? "Salvando..." : "Salvar Opção"}
           </button>
-          <button type="button" onClick={onCancel}>
+          <button type="button" class="cancel-btn" onClick={onCancel}>
             Cancelar
           </button>
         </div>

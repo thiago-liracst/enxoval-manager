@@ -96,7 +96,11 @@ function AreaSelector({ onSelectArea }) {
             autoFocus
           />
           <button type="submit">Salvar</button>
-          <button type="button" onClick={() => setIsAdding(false)}>
+          <button
+            type="button"
+            class="cancel-btn"
+            onClick={() => setIsAdding(false)}
+          >
             Cancelar
           </button>
         </form>
