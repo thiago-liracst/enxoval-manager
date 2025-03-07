@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/enxoval-manager/static/css/main.14f8ec1b.css",
+    "main.js": "/enxoval-manager/static/js/main.5a3960d3.js",
+    "index.html": "/enxoval-manager/index.html",
+    "main.14f8ec1b.css.map": "/enxoval-manager/static/css/main.14f8ec1b.css.map",
+    "main.5a3960d3.js.map": "/enxoval-manager/static/js/main.5a3960d3.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.14f8ec1b.css",
+    "static/js/main.5a3960d3.js"
+  ]
+}
