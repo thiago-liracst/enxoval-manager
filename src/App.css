@@ -478,8 +478,8 @@ button.cancel-btn:hover {
   padding: 24px;
   margin-bottom: 30px;
   align-items: center;
-  margin-left: 175px;
-  margin-right: 175px;
+  margin-left: 12%;
+  margin-right: 12%;
 }
 
 .dashboard-metrics-header {
