@@ -63,76 +63,104 @@ function ItemDetail({ item, onBack }) {
   };
 
   return (
-    <div className="item-detail">
+    <div className="item-detail-container">
       <div className="item-detail-header">
-        <button className="back-button" onClick={onBack}>
-          ← Voltar para Lista
+        <button className="item-detail-back-button" onClick={onBack}>
+          <span className="back-arrow">←</span>
+          Voltar para Lista
         </button>
       </div>
 
-      <div className="item-info">
+      <div className="item-detail-card">
         {isEditing ? (
-          <>
-            <input
-              type="text"
-              value={editedItem.nome}
-              onChange={(e) =>
-                setEditedItem({ ...editedItem, nome: e.target.value })
-              }
-            />
-            <textarea
-              value={editedItem.descricao}
-              onChange={(e) =>
-                setEditedItem({ ...editedItem, descricao: e.target.value })
-              }
-            />
-            <input
-              type="number"
-              value={editedItem.quantidade}
-              onChange={(e) =>
-                setEditedItem({ ...editedItem, quantidade: e.target.value })
-              }
-            />
-            <div className="item-actions">
-              <button onClick={handleSaveEdit}>Salvar</button>
+          <div className="item-edit-form">
+            <div className="form-group">
+              <label>Nome do Item</label>
+              <input
+                type="text"
+                className="form-input"
+                value={editedItem.nome}
+                onChange={(e) =>
+                  setEditedItem({ ...editedItem, nome: e.target.value })
+                }
+              />
             </div>
-          </>
+
+            <div className="form-group">
+              <label>Descrição</label>
+              <textarea
+                className="form-textarea"
+                value={editedItem.descricao}
+                onChange={(e) =>
+                  setEditedItem({ ...editedItem, descricao: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Quantidade</label>
+              <input
+                type="number"
+                className="form-input"
+                value={editedItem.quantidade}
+                onChange={(e) =>
+                  setEditedItem({ ...editedItem, quantidade: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="item-form-actions">
+              <button className="button-primary" onClick={handleSaveEdit}>
+                Salvar Alterações
+              </button>
+            </div>
+          </div>
         ) : (
-          <>
-            <h2>{item.nome}</h2>
-            <p>
-              <strong>Descrição:</strong> {item.descricao || "Sem descrição"}
-            </p>
-            <p>
-              <strong>Quantidade:</strong> {item.quantidade}
-            </p>
-            <div className="item-actions">
-              <button onClick={handleEdit}>Editar</button>
+          <div className="item-info-view">
+            <h2 className="item-title">{item.nome}</h2>
+            <div className="item-meta">
+              <div className="meta-group">
+                <span className="meta-label">Descrição:</span>
+                <p className="meta-content">
+                  {item.descricao || "Sem descrição"}
+                </p>
+              </div>
+              <div className="meta-group">
+                <span className="meta-label">Quantidade:</span>
+                <p className="meta-content">{item.quantidade}</p>
+              </div>
             </div>
-          </>
+            <button className="button-edit" onClick={handleEdit}>
+              Editar Item
+            </button>
+          </div>
         )}
       </div>
 
-      <div className="item-options-section">
-        <div className="section-header">
-          <h3>Opções de Compra</h3>
-          <button onClick={handleAddOption}>Adicionar Opção</button>
+      <div className="item-options-panel">
+        <div className="panel-header">
+          <h3 className="panel-title">Opções de Compra</h3>
+          <button className="button-add-option" onClick={handleAddOption}>
+            + Nova Opção
+          </button>
         </div>
 
-        {isAddingOption ? (
-          <OptionForm
-            item={item}
-            onOptionAdded={handleOptionAdded}
-            onCancel={handleCancelAddOption}
-          />
-        ) : loading ? (
-          <div>Carregando opções...</div>
-        ) : (
-          <OptionList
-            options={options}
-            onStatusChange={handleOptionStatusChange}
-          />
-        )}
+        <div className="panel-content">
+          {isAddingOption ? (
+            <OptionForm
+              item={item}
+              onOptionAdded={handleOptionAdded}
+              onCancel={handleCancelAddOption}
+            />
+          ) : loading ? (
+            <div className="loading-message">Carregando opções...</div>
+          ) : (
+            <OptionList
+              options={options}
+              onStatusChange={handleOptionStatusChange}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

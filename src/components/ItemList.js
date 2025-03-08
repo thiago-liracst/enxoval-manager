@@ -24,12 +24,14 @@ function ItemList({ area, onSelectItem }) {
     fetchItems();
   }, [area]);
 
-  const handleDeleteItem = async (itemId) => {
+  const handleDeleteItem = async (itemId, event) => {
+    // Evitar que o clique no botão excluir selecione o item
+    event.stopPropagation();
+
     if (!window.confirm("Tem certeza que deseja excluir este Item?")) return;
     try {
       await deleteItem(itemId);
       setItems(await getItens());
-      //setEditingOption(null);
       if (onSelectItem) onSelectItem();
     } catch (error) {
       console.error("Erro ao excluir Item:", error);
@@ -37,38 +39,63 @@ function ItemList({ area, onSelectItem }) {
   };
 
   if (loading) {
-    return <div>Carregando itens...</div>;
+    return (
+      <div className="itemlist-loading">
+        <div className="itemlist-loading-spinner"></div>
+        <p>Carregando itens...</p>
+      </div>
+    );
   }
 
   if (items.length === 0) {
     return (
-      <div className="items-empty">
-        <p>Nenhum item cadastrado nesta área.</p>
+      <div className="itemlist-empty">
+        <div className="itemlist-empty-icon">📦</div>
+        <p className="itemlist-empty-text">
+          Nenhum item cadastrado nesta área.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="items-list">
-      <h3>Itens em {area.nome}</h3>
-      <div className="items-grid">
+    <div className="itemlist-container">
+      <h3 className="itemlist-title">
+        <span className="itemlist-title-icon">📋</span>
+        <span className="itemlist-title-text">Itens em {area.nome}</span>
+      </h3>
+
+      <div className="itemlist-grid">
         {items.map((item) => (
           <div
             key={item.id}
-            className="item-card"
+            className="itemlist-card"
             onClick={() => onSelectItem(item)}
           >
-            <h4>{item.nome}</h4>
-            <p>{item.descricao || "Sem descrição"}</p>
-            <div className="item-footer">
-              <span>Qtd: {item.quantidade}</span>
-              <span>{item.opcoesCount} opções</span>
+            <div className="itemlist-card-content">
+              <h4 className="itemlist-card-title">{item.nome}</h4>
+              <p className="itemlist-card-description">
+                {item.descricao || "Sem descrição"}
+              </p>
+
+              <div className="itemlist-card-footer">
+                <span className="itemlist-card-quantity">
+                  <span className="itemlist-card-icon">🔢</span>
+                  Qtd: {item.quantidade}
+                </span>
+                <span className="itemlist-card-options">
+                  <span className="itemlist-card-icon">🔣</span>
+                  {item.opcoesCount} opções
+                </span>
+              </div>
             </div>
+
             <button
-              className="delete-btn"
-              onClick={() => handleDeleteItem(item.id)}
+              className="itemlist-card-delete"
+              onClick={(e) => handleDeleteItem(item.id, e)}
+              title="Excluir item"
             >
-              🗑
+              <span className="itemlist-delete-icon">🗑</span>
             </button>
           </div>
         ))}

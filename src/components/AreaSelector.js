@@ -65,44 +65,62 @@ function AreaSelector({ onSelectArea }) {
     }
   };
 
-  if (loading) return <div>Carregando áreas...</div>;
+  if (loading)
+    return <div className="area-selector__loading">Carregando áreas...</div>;
 
   return (
     <div className="area-selector">
-      <h2>Áreas da Casa</h2>
-      <div className="areas-list">
+      <h2 className="area-selector__title">Áreas da Casa</h2>
+      <div className="area-selector__list">
         {areas.map((area) => (
-          <div key={area.id} className="area-item">
-            <span onClick={() => onSelectArea(area)}>{area.nome}</span>
+          <div key={area.id} className="area-selector__item">
             <button
-              className="delete-btn"
-              onClick={() => handleDeleteArea(area.id)}
+              className="area-selector__item-name"
+              onClick={() => onSelectArea(area)}
             >
-              🗑
+              {area.nome}
+            </button>
+            <button
+              className="area-selector__delete-btn"
+              onClick={() => handleDeleteArea(area.id)}
+              aria-label="Excluir área"
+            >
+              <span className="area-selector__delete-icon">🗑</span>
             </button>
           </div>
         ))}
       </div>
+
       {isAdding ? (
-        <form onSubmit={handleAddArea}>
+        <form className="area-selector__form" onSubmit={handleAddArea}>
           <input
             type="text"
+            className="area-selector__input"
             value={newAreaName}
             onChange={(e) => setNewAreaName(e.target.value)}
             placeholder="Nome da nova área"
             autoFocus
           />
-          <button type="submit">Salvar</button>
-          <button
-            type="button"
-            className="cancel-btn"
-            onClick={() => setIsAdding(false)}
-          >
-            Cancelar
-          </button>
+          <div className="area-selector__form-buttons">
+            <button type="submit" className="area-selector__submit-btn">
+              Salvar
+            </button>
+            <button
+              type="button"
+              className="area-selector__cancel-btn"
+              onClick={() => setIsAdding(false)}
+            >
+              Cancelar
+            </button>
+          </div>
         </form>
       ) : (
-        <button onClick={() => setIsAdding(true)}>Adicionar nova área</button>
+        <button
+          className="area-selector__add-btn"
+          onClick={() => setIsAdding(true)}
+        >
+          <span className="area-selector__add-icon">+</span> Adicionar nova área
+        </button>
       )}
     </div>
   );

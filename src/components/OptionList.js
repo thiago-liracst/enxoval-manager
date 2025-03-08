@@ -47,8 +47,6 @@ function OptionList({ options, onStatusChange }) {
     if (!window.confirm("Tem certeza que deseja excluir esta opção?")) return;
     try {
       await deleteOption(optionId);
-      setEditedOption(await getOptions());
-      //setEditingOption(null);
       if (onStatusChange) onStatusChange();
     } catch (error) {
       console.error("Erro ao excluir opção:", error);
@@ -57,148 +55,160 @@ function OptionList({ options, onStatusChange }) {
 
   if (options.length === 0) {
     return (
-      <div className="options-empty">
-        <p>Nenhuma opção cadastrada para este item.</p>
+      <div className="option-list__empty">
+        <div className="option-list__empty-icon">📋</div>
+        <h3>Nenhuma opção cadastrada</h3>
         <p>Adicione opções para comparar preços e características.</p>
       </div>
     );
   }
 
   return (
-    <div className="options-table-container">
-      <table className="options-table">
-        <thead>
-          <tr>
-            <th>Descrição</th>
-            <th>Preço</th>
-            <th>Link</th>
-            <th>Status</th>
-            <th>Ações</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {options.map((option) => (
-            <tr
-              key={option.id}
-              className={option.status === "comprado" ? "option-purchased" : ""}
-            >
-              <td>
-                {editingOption === option.id ? (
-                  <input
-                    type="text"
-                    value={editedOption.descricao}
-                    onChange={(e) =>
-                      setEditedOption({
-                        ...editedOption,
-                        descricao: e.target.value,
-                      })
-                    }
-                  />
-                ) : (
-                  option.descricao
-                )}
-              </td>
-              <td className="price-column">
-                {editingOption === option.id ? (
-                  <input
-                    type="number"
-                    value={editedOption.preco}
-                    onChange={(e) =>
-                      setEditedOption({
-                        ...editedOption,
-                        preco: e.target.value,
-                      })
-                    }
-                  />
-                ) : (
-                  option.preco.toLocaleString("pt-BR", {
+    <div className="option-list">
+      {options.map((option) => (
+        <div
+          key={option.id}
+          className={`option-card ${
+            option.status === "comprado" ? "option-card--purchased" : ""
+          }`}
+        >
+          {editingOption === option.id ? (
+            <div className="option-card__edit-mode">
+              <div className="option-card__form-group">
+                <label>Descrição</label>
+                <input
+                  type="text"
+                  value={editedOption.descricao}
+                  onChange={(e) =>
+                    setEditedOption({
+                      ...editedOption,
+                      descricao: e.target.value,
+                    })
+                  }
+                  className="option-card__input"
+                />
+              </div>
+
+              <div className="option-card__form-group">
+                <label>Preço (R$)</label>
+                <input
+                  type="number"
+                  value={editedOption.preco}
+                  onChange={(e) =>
+                    setEditedOption({
+                      ...editedOption,
+                      preco: e.target.value,
+                    })
+                  }
+                  className="option-card__input"
+                />
+              </div>
+
+              <div className="option-card__form-group">
+                <label>Link</label>
+                <input
+                  type="text"
+                  value={editedOption.link}
+                  onChange={(e) =>
+                    setEditedOption({ ...editedOption, link: e.target.value })
+                  }
+                  className="option-card__input"
+                />
+              </div>
+
+              <div className="option-card__actions">
+                <button
+                  className="option-card__btn option-card__btn--save"
+                  onClick={() => handleSaveEdit(option.id)}
+                >
+                  <span className="option-card__btn-icon">💾</span>
+                  <span className="option-card__btn-text">Salvar</span>
+                </button>
+                <button
+                  className="option-card__btn option-card__btn--cancel"
+                  onClick={() => setEditingOption(null)}
+                >
+                  <span className="option-card__btn-text">Cancelar</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="option-card__header">
+                <div className="option-card__status">
+                  <span
+                    className={`option-card__status-badge option-card__status-badge--${option.status}`}
+                  >
+                    {option.status === "pendente" ? "Pendente" : "Comprado"}
+                  </span>
+                </div>
+                <div className="option-card__actions-top">
+                  <button
+                    className="option-card__btn option-card__btn--icon"
+                    onClick={() => handleEditOption(option)}
+                    title="Editar"
+                  >
+                    <span className="option-card__btn-icon">✏️</span>
+                  </button>
+                  <button
+                    className="option-card__btn option-card__btn--icon"
+                    onClick={() => handleDeleteOption(option.id)}
+                    title="Excluir"
+                  >
+                    <span className="option-card__btn-icon">🗑</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="option-card__content">
+                <h3 className="option-card__title">{option.descricao}</h3>
+                <div className="option-card__price">
+                  {option.preco.toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
-                  })
-                )}
-              </td>
-              <td>
-                {editingOption === option.id ? (
-                  <input
-                    type="text"
-                    value={editedOption.link}
-                    onChange={(e) =>
-                      setEditedOption({ ...editedOption, link: e.target.value })
-                    }
-                  />
-                ) : option.link ? (
+                  })}
+                </div>
+
+                {option.link && (
                   <a
                     href={option.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="option-link"
+                    className="option-card__link"
                   >
-                    Ver produto
+                    <span className="option-card__link-icon">🔗</span>
+                    <span className="option-card__link-text">Ver produto</span>
                   </a>
-                ) : (
-                  <span>-</span>
                 )}
-              </td>
-              <td>
-                <span className={`status-badge status-${option.status}`}>
-                  {option.status === "pendente" ? "Pendente" : "Comprado"}
-                </span>
-              </td>
-              <td>
+              </div>
+
+              <div className="option-card__footer">
                 {option.status === "pendente" ? (
-                  <>
-                    <button
-                      className="status-button purchased-button"
-                      onClick={() => handleStatusChange(option.id, "comprado")}
-                    >
+                  <button
+                    className="option-card__btn option-card__btn--purchase"
+                    onClick={() => handleStatusChange(option.id, "comprado")}
+                  >
+                    <span className="option-card__btn-icon">✓</span>
+                    <span className="option-card__btn-text">
                       Marcar como comprado
-                    </button>
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDeleteOption(option.id)}
-                    >
-                      🗑
-                    </button>
-                  </>
+                    </span>
+                  </button>
                 ) : (
-                  <>
-                    <button
-                      className="status-button pending-button"
-                      onClick={() => handleStatusChange(option.id, "pendente")}
-                    >
+                  <button
+                    className="option-card__btn option-card__btn--pending"
+                    onClick={() => handleStatusChange(option.id, "pendente")}
+                  >
+                    <span className="option-card__btn-icon">↩</span>
+                    <span className="option-card__btn-text">
                       Marcar como pendente
-                    </button>
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDeleteOption(option.id)}
-                    >
-                      🗑
-                    </button>
-                  </>
-                )}
-              </td>
-              <td>
-                {editingOption === option.id ? (
-                  <button
-                    className="save-btn"
-                    onClick={() => handleSaveEdit(option.id)}
-                  >
-                    💾
-                  </button>
-                ) : (
-                  <button
-                    className="edit-btn"
-                    onClick={() => handleEditOption(option)}
-                  >
-                    ✏️
+                    </span>
                   </button>
                 )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </div>
+            </>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

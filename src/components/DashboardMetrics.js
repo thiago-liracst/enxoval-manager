@@ -7,6 +7,7 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  Cell,
 } from "recharts";
 
 function DashboardMetrics({ refreshTrigger }) {
@@ -21,8 +22,21 @@ function DashboardMetrics({ refreshTrigger }) {
     categoryDistribution: [],
   });
 
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Cores para o gráfico
+  const CHART_COLORS = [
+    "#8884d8",
+    "#82ca9d",
+    "#ffc658",
+    "#ff8042",
+    "#a4de6c",
+    "#d0ed57",
+  ];
+
   useEffect(() => {
     const fetchMetrics = async () => {
+      setIsLoading(true);
       try {
         const items = await getAllItems();
         const areas = await getAreas();
@@ -80,46 +94,139 @@ function DashboardMetrics({ refreshTrigger }) {
         });
       } catch (error) {
         console.error("Erro ao buscar métricas:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchMetrics();
-  }, [refreshTrigger]); // 🔄 Atualiza sempre que refreshTrigger mudar
+  }, [refreshTrigger]);
+
+  // Formata valor monetário
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="dashboard-metrics-container">
+        <div className="dashboard-metrics-loading">
+          <div className="dashboard-metrics-spinner"></div>
+          <p>Carregando métricas...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="dashboard-metrics">
-      <h2>📊 Dashboard de Métricas</h2>
-      <div className="metrics-grid">
-        <div className="metric-box">Total de Itens: {metrics.totalItems}</div>
-        <div className="metric-box">
-          Total Comprado: R$ {metrics.totalPurchased.toFixed(2)}
+    <div className="dashboard-metrics-container">
+      <div className="dashboard-metrics-header">
+        <h2 className="dashboard-metrics-title">📊 Dashboard de Métricas</h2>
+      </div>
+
+      <div className="dashboard-metrics-grid">
+        <div className="dashboard-metrics-card dashboard-metrics-total">
+          <div className="dashboard-metrics-card-inner">
+            <span className="dashboard-metrics-card-label">Total de Itens</span>
+            <span className="dashboard-metrics-card-value">
+              {metrics.totalItems}
+            </span>
+          </div>
         </div>
-        <div className="metric-box">
-          Valor Pendente: R$ {metrics.totalPending.toFixed(2)}
+
+        <div className="dashboard-metrics-card dashboard-metrics-purchased">
+          <div className="dashboard-metrics-card-inner">
+            <span className="dashboard-metrics-card-label">Total Comprado</span>
+            <span className="dashboard-metrics-card-value">
+              {formatCurrency(metrics.totalPurchased)}
+            </span>
+          </div>
         </div>
-        <div className="metric-box">
-          Preço Médio por Item: R$ {metrics.avgPricePerItem.toFixed(2)}
+
+        <div className="dashboard-metrics-card dashboard-metrics-pending">
+          <div className="dashboard-metrics-card-inner">
+            <span className="dashboard-metrics-card-label">Valor Pendente</span>
+            <span className="dashboard-metrics-card-value">
+              {formatCurrency(metrics.totalPending)}
+            </span>
+          </div>
         </div>
-        <div className="metric-box">
-          Maior Valor: R$ {metrics.highestPrice.toFixed(2)}
+
+        <div className="dashboard-metrics-card dashboard-metrics-average">
+          <div className="dashboard-metrics-card-inner">
+            <span className="dashboard-metrics-card-label">
+              Preço Médio por Item
+            </span>
+            <span className="dashboard-metrics-card-value">
+              {formatCurrency(metrics.avgPricePerItem)}
+            </span>
+          </div>
         </div>
-        <div className="metric-box">
-          Menor Valor: R$ {metrics.lowestPrice.toFixed(2)}
+
+        <div className="dashboard-metrics-card dashboard-metrics-highest">
+          <div className="dashboard-metrics-card-inner">
+            <span className="dashboard-metrics-card-label">Maior Valor</span>
+            <span className="dashboard-metrics-card-value">
+              {formatCurrency(metrics.highestPrice)}
+            </span>
+          </div>
         </div>
-        <div className="metric-box">
-          Conclusão: {metrics.completionPercentage.toFixed(2)}%
+
+        <div className="dashboard-metrics-card dashboard-metrics-lowest">
+          <div className="dashboard-metrics-card-inner">
+            <span className="dashboard-metrics-card-label">Menor Valor</span>
+            <span className="dashboard-metrics-card-value">
+              {formatCurrency(metrics.lowestPrice)}
+            </span>
+          </div>
+        </div>
+
+        <div className="dashboard-metrics-card dashboard-metrics-completion">
+          <div className="dashboard-metrics-card-inner">
+            <span className="dashboard-metrics-card-label">Conclusão</span>
+            <div className="dashboard-metrics-progress-container">
+              <div
+                className="dashboard-metrics-progress-bar"
+                style={{ width: `${metrics.completionPercentage}%` }}
+              ></div>
+              <span className="dashboard-metrics-progress-text">
+                {metrics.completionPercentage.toFixed(2)}%
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <h3>📌 Distribuição por Área</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={metrics.categoryDistribution}>
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="value" fill="#8884d8" />
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="dashboard-metrics-chart-container">
+        <h3 className="dashboard-metrics-subtitle">📌 Distribuição por Área</h3>
+        <div className="dashboard-metrics-chart">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={metrics.categoryDistribution}>
+              <XAxis dataKey="name" stroke="#666" fontSize={12} />
+              <YAxis stroke="#666" fontSize={12} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  border: "none",
+                }}
+              />
+              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                {metrics.categoryDistribution.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={CHART_COLORS[index % CHART_COLORS.length]}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   );
 }
