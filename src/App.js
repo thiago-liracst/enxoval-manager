@@ -1,6 +1,7 @@
 // src/App.js
 import React, { useState } from "react";
 import AreaSelector from "./components/AreaSelector";
+import DashboardMetrics from "./components/DashboardMetrics";
 import AreaPage from "./pages/AreaPage";
 import "./App.css";
 
@@ -16,6 +17,10 @@ function App() {
       <header className="App-header">
         <h1>Enxoval Manager</h1>
       </header>
+
+      <div>
+        <DashboardMetrics />
+      </div>
 
       <div className="container">
         <AreaSelector onSelectArea={handleSelectArea} />

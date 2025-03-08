@@ -77,6 +77,21 @@ export const getOptionsByItem = async (itemId) => {
   }));
 };
 
+export const getAllItems = async () => {
+  try {
+    const itemsCollection = collection(db, "items");
+    const itemsSnapshot = await getDocs(itemsCollection);
+
+    return itemsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  } catch (error) {
+    console.error("Erro ao buscar todos os itens:", error);
+    throw error;
+  }
+};
+
 export const addOption = async (optionData) => {
   const optionRef = await addDoc(collection(db, "opcoes"), {
     ...optionData,
