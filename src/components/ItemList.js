@@ -1,6 +1,6 @@
 // src/components/ItemList.js
 import React, { useState, useEffect } from "react";
-import { getItemsByArea } from "../services/firebase";
+import { deleteItem, getItemsByArea, getItens } from "../services/firebase";
 
 function ItemList({ area, onSelectItem }) {
   const [items, setItems] = useState([]);
@@ -23,6 +23,18 @@ function ItemList({ area, onSelectItem }) {
 
     fetchItems();
   }, [area]);
+
+  const handleDeleteItem = async (itemId) => {
+    if (!window.confirm("Tem certeza que deseja excluir este Item?")) return;
+    try {
+      await deleteItem(itemId);
+      setItems(await getItens());
+      //setEditingOption(null);
+      if (onSelectItem) onSelectItem();
+    } catch (error) {
+      console.error("Erro ao excluir Item:", error);
+    }
+  };
 
   if (loading) {
     return <div>Carregando itens...</div>;
@@ -52,6 +64,12 @@ function ItemList({ area, onSelectItem }) {
               <span>Qtd: {item.quantidade}</span>
               <span>{item.opcoesCount} opções</span>
             </div>
+            <button
+              className="delete-btn"
+              onClick={() => handleDeleteItem(item.id)}
+            >
+              🗑
+            </button>
           </div>
         ))}
       </div>

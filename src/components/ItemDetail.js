@@ -1,6 +1,5 @@
-// src/components/ItemDetail.js
 import React, { useState, useEffect } from "react";
-import { getOptionsByItem } from "../services/firebase";
+import { getOptionsByItem, updateItem } from "../services/firebase";
 import OptionList from "./OptionList";
 import OptionForm from "./OptionForm";
 
@@ -9,6 +8,12 @@ function ItemDetail({ item, onBack }) {
   const [loading, setLoading] = useState(true);
   const [isAddingOption, setIsAddingOption] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedItem, setEditedItem] = useState({
+    nome: item.nome,
+    descricao: item.descricao,
+    quantidade: item.quantidade,
+  });
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -32,7 +37,6 @@ function ItemDetail({ item, onBack }) {
 
   const handleOptionAdded = () => {
     setIsAddingOption(false);
-    // Atualiza a lista de opções
     setRefreshTrigger((prev) => prev + 1);
   };
 
@@ -41,8 +45,21 @@ function ItemDetail({ item, onBack }) {
   };
 
   const handleOptionStatusChange = () => {
-    // Atualiza a lista quando o status de uma opção muda
     setRefreshTrigger((prev) => prev + 1);
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await updateItem(item.id, editedItem);
+      setIsEditing(false);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (error) {
+      console.error("Erro ao atualizar item:", error);
+    }
   };
 
   return (
@@ -51,16 +68,49 @@ function ItemDetail({ item, onBack }) {
         <button className="back-button" onClick={onBack}>
           ← Voltar para Lista
         </button>
-        <h2>{item.nome}</h2>
       </div>
 
       <div className="item-info">
-        <p>
-          <strong>Descrição:</strong> {item.descricao || "Sem descrição"}
-        </p>
-        <p>
-          <strong>Quantidade:</strong> {item.quantidade}
-        </p>
+        {isEditing ? (
+          <>
+            <input
+              type="text"
+              value={editedItem.nome}
+              onChange={(e) =>
+                setEditedItem({ ...editedItem, nome: e.target.value })
+              }
+            />
+            <textarea
+              value={editedItem.descricao}
+              onChange={(e) =>
+                setEditedItem({ ...editedItem, descricao: e.target.value })
+              }
+            />
+            <input
+              type="number"
+              value={editedItem.quantidade}
+              onChange={(e) =>
+                setEditedItem({ ...editedItem, quantidade: e.target.value })
+              }
+            />
+            <div className="item-actions">
+              <button onClick={handleSaveEdit}>Salvar</button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h2>{item.nome}</h2>
+            <p>
+              <strong>Descrição:</strong> {item.descricao || "Sem descrição"}
+            </p>
+            <p>
+              <strong>Quantidade:</strong> {item.quantidade}
+            </p>
+            <div className="item-actions">
+              <button onClick={handleEdit}>Editar</button>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="item-options-section">

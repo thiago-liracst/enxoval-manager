@@ -1,6 +1,10 @@
-// src/components/AreaSelector.js
 import React, { useState, useEffect } from "react";
-import { getAreas, addArea, cleanDuplicateAreas } from "../services/firebase";
+import {
+  getAreas,
+  addArea,
+  cleanDuplicateAreas,
+  deleteArea,
+} from "../services/firebase";
 
 function AreaSelector({ onSelectArea }) {
   const [areas, setAreas] = useState([]);
@@ -11,39 +15,28 @@ function AreaSelector({ onSelectArea }) {
   useEffect(() => {
     const fetchAreas = async () => {
       try {
-        // Primeiro, limpa áreas duplicadas
         await cleanDuplicateAreas();
-
-        // Depois carrega as áreas
         const areasData = await getAreas();
-
-        // Se não houver áreas, cria as padrões
         if (areasData.length === 0) {
           const defaultAreas = ["Sala", "Cozinha", "Banheiro", "Quarto"];
-          const promises = defaultAreas.map((area) => addArea({ nome: area }));
-
-          await Promise.all(promises);
-          const newAreasData = await getAreas();
-          setAreas(newAreasData);
+          await Promise.all(
+            defaultAreas.map((area) => addArea({ nome: area }))
+          );
+          setAreas(await getAreas());
         } else {
           setAreas(areasData);
         }
-
-        setLoading(false);
       } catch (error) {
         console.error("Erro ao carregar áreas:", error);
-        setLoading(false);
       }
+      setLoading(false);
     };
-
     fetchAreas();
   }, []);
 
   const handleAddArea = async (e) => {
     e.preventDefault();
-    if (newAreaName.trim() === "") return;
-
-    // Verifica se já existe uma área com o mesmo nome
+    if (!newAreaName.trim()) return;
     if (
       areas.some(
         (area) => area.nome.toLowerCase() === newAreaName.trim().toLowerCase()
@@ -52,40 +45,44 @@ function AreaSelector({ onSelectArea }) {
       alert("Já existe uma área com este nome!");
       return;
     }
-
     try {
       await addArea({ nome: newAreaName.trim() });
       setNewAreaName("");
       setIsAdding(false);
-
-      // Recarrega as áreas
-      const areasData = await getAreas();
-      setAreas(areasData);
+      setAreas(await getAreas());
     } catch (error) {
       console.error("Erro ao adicionar área:", error);
     }
   };
 
-  if (loading) {
-    return <div>Carregando áreas...</div>;
-  }
+  const handleDeleteArea = async (areaId) => {
+    if (!window.confirm("Tem certeza que deseja excluir esta área?")) return;
+    try {
+      await deleteArea(areaId);
+      setAreas(await getAreas());
+    } catch (error) {
+      console.error("Erro ao excluir área:", error);
+    }
+  };
+
+  if (loading) return <div>Carregando áreas...</div>;
 
   return (
     <div className="area-selector">
       <h2>Áreas da Casa</h2>
-
       <div className="areas-list">
         {areas.map((area) => (
-          <div
-            key={area.id}
-            className="area-item"
-            onClick={() => onSelectArea(area)}
-          >
-            {area.nome}
+          <div key={area.id} className="area-item">
+            <span onClick={() => onSelectArea(area)}>{area.nome}</span>
+            <button
+              className="delete-btn"
+              onClick={() => handleDeleteArea(area.id)}
+            >
+              🗑
+            </button>
           </div>
         ))}
       </div>
-
       {isAdding ? (
         <form onSubmit={handleAddArea}>
           <input
@@ -98,7 +95,7 @@ function AreaSelector({ onSelectArea }) {
           <button type="submit">Salvar</button>
           <button
             type="button"
-            class="cancel-btn"
+            className="cancel-btn"
             onClick={() => setIsAdding(false)}
           >
             Cancelar

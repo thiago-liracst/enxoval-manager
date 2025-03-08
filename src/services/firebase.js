@@ -146,4 +146,102 @@ export const cleanDuplicateAreas = async () => {
   return false; // Retorna false se não havia duplicatas
 };
 
+// Excluir uma área pelo ID
+export const deleteArea = async (areaId) => {
+  try {
+    const areaRef = doc(db, "areas", areaId);
+    await deleteDoc(areaRef);
+    console.log(`Área com ID ${areaId} excluída com sucesso.`);
+  } catch (error) {
+    console.error("Erro ao excluir área:", error);
+    throw error;
+  }
+};
+
+// Excluir um item pelo ID e suas opções
+export const deleteItem = async (itemId) => {
+  try {
+    // Deleta todas as opções associadas ao item
+    const optionsQuery = query(
+      collection(db, "opcoes"),
+      where("itemId", "==", itemId)
+    );
+    const optionsSnapshot = await getDocs(optionsQuery);
+
+    const deletePromises = optionsSnapshot.docs.map((optionDoc) =>
+      deleteDoc(optionDoc.ref)
+    );
+    await Promise.all(deletePromises);
+
+    // Deleta o item após remover as opções associadas
+    const itemRef = doc(db, "items", itemId);
+    await deleteDoc(itemRef);
+
+    console.log(
+      `Item ${itemId} e todas as opções associadas foram excluídos com sucesso.`
+    );
+  } catch (error) {
+    console.error("Erro ao excluir item e opções associadas:", error);
+    throw error;
+  }
+};
+
+// Excluir uma opção de item pelo ID
+export const deleteOption = async (optionId) => {
+  try {
+    const optionRef = doc(db, "opcoes", optionId);
+    await deleteDoc(optionRef);
+    console.log(`Opção com ID ${optionId} excluída com sucesso.`);
+  } catch (error) {
+    console.error("Erro ao excluir opção:", error);
+    throw error;
+  }
+};
+
+export const updateItem = async (itemId, updatedData) => {
+  try {
+    const itemRef = doc(db, "items", itemId);
+    await updateDoc(itemRef, {
+      ...updatedData,
+      dataAtualizacao: new Date(),
+    });
+    console.log(`Item ${itemId} atualizado com sucesso!`);
+  } catch (error) {
+    console.error("Erro ao atualizar item:", error);
+    throw error;
+  }
+};
+
+export const updateOption = async (optionId, updatedData) => {
+  try {
+    const optionRef = doc(db, "opcoes", optionId);
+    await updateDoc(optionRef, {
+      ...updatedData,
+      dataAtualizacao: new Date(),
+    });
+    console.log(`Opção ${optionId} atualizada com sucesso!`);
+  } catch (error) {
+    console.error("Erro ao atualizar opção:", error);
+    throw error;
+  }
+};
+
+export const getItens = async () => {
+  const itensCollection = collection(db, "items");
+  const itemSnapshot = await getDocs(itensCollection);
+  return itemSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+};
+
+export const getOptions = async () => {
+  const optionsCollection = collection(db, "opcoes");
+  const optionSnapshot = await getDocs(optionsCollection);
+  return optionSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+};
+
 export { db };
