@@ -45,53 +45,79 @@ function ItemForm({ area, onItemAdded, onCancel }) {
   };
 
   return (
-    <div className="item-form">
-      <h3>Adicionar Novo Item</h3>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="itemName">Nome do Item *</label>
-          <input
-            type="text"
-            id="itemName"
-            value={itemName}
-            onChange={(e) => setItemName(e.target.value)}
-            placeholder="Ex: Sofá, Toalhas, Geladeira"
-            required
-          />
-        </div>
+    <div className="item-form-container">
+      <div className="item-form-card">
+        <h3 className="item-form-title">Adicionar Novo Item</h3>
+        <form onSubmit={handleSubmit} className="item-form">
+          <div className="item-form-group">
+            <label className="item-form-label" htmlFor="itemName">
+              Nome do Item <span className="item-form-required">*</span>
+            </label>
+            <input
+              className="item-form-input"
+              type="text"
+              id="itemName"
+              value={itemName}
+              onChange={(e) => setItemName(e.target.value)}
+              placeholder="Ex: Sofá, Toalhas, Geladeira"
+              required
+            />
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="itemDescription">Descrição</label>
-          <textarea
-            id="itemDescription"
-            value={itemDescription}
-            onChange={(e) => setItemDescription(e.target.value)}
-            placeholder="Descrição ou observações sobre o item"
-            rows="3"
-          />
-        </div>
+          <div className="item-form-group">
+            <label className="item-form-label" htmlFor="itemDescription">
+              Descrição
+            </label>
+            <textarea
+              className="item-form-textarea"
+              id="itemDescription"
+              value={itemDescription}
+              onChange={(e) => setItemDescription(e.target.value)}
+              placeholder="Descrição ou observações sobre o item"
+              rows="3"
+            />
+          </div>
 
-        <div className="form-group">
-          <label htmlFor="itemQuantity">Quantidade</label>
-          <input
-            type="number"
-            id="itemQuantity"
-            value={itemQuantity}
-            onChange={(e) => setItemQuantity(e.target.value)}
-            min="1"
-            required
-          />
-        </div>
+          <div className="item-form-group">
+            <label className="item-form-label" htmlFor="itemQuantity">
+              Quantidade
+            </label>
+            <input
+              className="item-form-input item-form-input-number"
+              type="number"
+              id="itemQuantity"
+              value={itemQuantity}
+              onChange={(e) => setItemQuantity(e.target.value)}
+              min="1"
+              required
+            />
+          </div>
 
-        <div className="form-buttons">
-          <button type="submit" disabled={submitting}>
-            {submitting ? "Salvando..." : "Salvar Item"}
-          </button>
-          <button type="button" class="cancel-btn" onClick={onCancel}>
-            Cancelar
-          </button>
-        </div>
-      </form>
+          <div className="item-form-buttons">
+            <button
+              type="button"
+              className="item-form-button item-form-button-cancel"
+              onClick={onCancel}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="item-form-button item-form-button-primary"
+              disabled={submitting}
+            >
+              {submitting ? (
+                <span className="item-form-button-loading">
+                  <span className="item-form-spinner"></span>
+                  Salvando...
+                </span>
+              ) : (
+                "Salvar Item"
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

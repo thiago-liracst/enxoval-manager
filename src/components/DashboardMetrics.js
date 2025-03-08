@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { getAllItems, getOptionsByItem, getAreas } from "../services/firebase";
+import {
+  getAllItems,
+  getOptionsByItem,
+  getAreas,
+  getOptions,
+} from "../services/firebase";
 import {
   BarChart,
   Bar,
@@ -40,6 +45,7 @@ function DashboardMetrics({ refreshTrigger }) {
       try {
         const items = await getAllItems();
         const areas = await getAreas();
+        const options = await getOptions();
         const areaMap = areas.reduce((acc, area) => {
           acc[area.id] = area.nome;
           return acc;
@@ -85,7 +91,7 @@ function DashboardMetrics({ refreshTrigger }) {
           highestPrice: Math.max(...totalPrices),
           lowestPrice: Math.min(...totalPrices),
           completionPercentage:
-            (items.filter((item) => item.status === "comprado").length /
+            (options.filter((option) => option.status === "comprado").length /
               items.length) *
             100,
           categoryDistribution: Object.entries(categoryMap).map(
