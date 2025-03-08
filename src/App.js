@@ -15,7 +15,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Enxoval Manager</h1>
+        <h1>Nossa Casa Nova</h1>
       </header>
 
       <div>
