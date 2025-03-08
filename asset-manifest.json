@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/enxoval-manager/static/css/main.14f8ec1b.css",
-    "main.js": "/enxoval-manager/static/js/main.5a3960d3.js",
+    "main.css": "/enxoval-manager/static/css/main.4af997f5.css",
+    "main.js": "/enxoval-manager/static/js/main.f919059f.js",
     "index.html": "/enxoval-manager/index.html",
-    "main.14f8ec1b.css.map": "/enxoval-manager/static/css/main.14f8ec1b.css.map",
-    "main.5a3960d3.js.map": "/enxoval-manager/static/js/main.5a3960d3.js.map"
+    "main.4af997f5.css.map": "/enxoval-manager/static/css/main.4af997f5.css.map",
+    "main.f919059f.js.map": "/enxoval-manager/static/js/main.f919059f.js.map"
   },
   "entrypoints": [
-    "static/css/main.14f8ec1b.css",
-    "static/js/main.5a3960d3.js"
+    "static/css/main.4af997f5.css",
+    "static/js/main.f919059f.js"
   ]
 }
