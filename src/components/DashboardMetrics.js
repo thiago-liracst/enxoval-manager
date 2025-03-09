@@ -13,6 +13,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  Legend,
 } from "recharts";
 
 function DashboardMetrics({ refreshTrigger }) {
@@ -29,15 +30,46 @@ function DashboardMetrics({ refreshTrigger }) {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  // Cores para o gráfico
-  const CHART_COLORS = [
-    "#8884d8",
-    "#82ca9d",
-    "#ffc658",
-    "#ff8042",
-    "#a4de6c",
-    "#d0ed57",
-  ];
+  // Função para gerar cores dinamicamente com base no número de áreas
+  const generateColors = (count) => {
+    const baseColors = [
+      "#8884d8",
+      "#82ca9d",
+      "#ffc658",
+      "#ff8042",
+      "#a4de6c",
+      "#d0ed57",
+      "#f783ac",
+      "#6a8caf",
+      "#ff7c43",
+      "#2b908f",
+      "#f1595f",
+      "#79c36a",
+      "#599ad3",
+      "#f9a65a",
+      "#9e66ab",
+      "#cd7058",
+      "#d77fb3",
+      "#59a14f",
+      "#9D02D7",
+      "#0000ff",
+    ];
+
+    // Se tivermos mais áreas que cores base, gere cores adicionais
+    if (count <= baseColors.length) {
+      return baseColors.slice(0, count);
+    } else {
+      const colors = [...baseColors];
+      // Gera cores adicionais
+      for (let i = baseColors.length; i < count; i++) {
+        const r = Math.floor(Math.random() * 200) + 55; // Evita cores muito escuras
+        const g = Math.floor(Math.random() * 200) + 55;
+        const b = Math.floor(Math.random() * 200) + 55;
+        colors.push(`rgb(${r}, ${g}, ${b})`);
+      }
+      return colors;
+    }
+  };
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -55,6 +87,11 @@ function DashboardMetrics({ refreshTrigger }) {
         let totalPending = 0;
         let totalPrices = [];
         let categoryMap = {};
+
+        // Inicializa todas as áreas com zero itens
+        areas.forEach((area) => {
+          categoryMap[area.nome] = 0;
+        });
 
         for (const item of items) {
           const options = await getOptionsByItem(item.id);
@@ -80,6 +117,11 @@ function DashboardMetrics({ refreshTrigger }) {
           categoryMap[areaNome] = (categoryMap[areaNome] || 0) + 1;
         }
 
+        // Converte o mapa de categorias em array para o gráfico
+        const categoryDistribution = Object.entries(categoryMap)
+          .map(([key, value]) => ({ name: key, value }))
+          .sort((a, b) => b.value - a.value); // Ordena por quantidade (opcional)
+
         setMetrics({
           totalItems: items.length,
           totalPurchased,
@@ -88,15 +130,16 @@ function DashboardMetrics({ refreshTrigger }) {
             totalPrices.length > 0
               ? totalPrices.reduce((sum, p) => sum + p, 0) / totalPrices.length
               : 0,
-          highestPrice: Math.max(...totalPrices),
-          lowestPrice: Math.min(...totalPrices),
+          highestPrice: Math.max(...totalPrices, 0),
+          lowestPrice: Math.min(...totalPrices, 0),
           completionPercentage:
-            (options.filter((option) => option.status === "comprado").length /
-              items.length) *
-            100,
-          categoryDistribution: Object.entries(categoryMap).map(
-            ([key, value]) => ({ name: key, value })
-          ),
+            items.length > 0
+              ? (options.filter((option) => option.status === "comprado")
+                  .length /
+                  items.length) *
+                100
+              : 0,
+          categoryDistribution,
         });
       } catch (error) {
         console.error("Erro ao buscar métricas:", error);
@@ -126,6 +169,9 @@ function DashboardMetrics({ refreshTrigger }) {
       </div>
     );
   }
+
+  // Gera cores dinamicamente com base no número de categorias
+  const chartColors = generateColors(metrics.categoryDistribution.length);
 
   return (
     <div className="dashboard-metrics-container">
@@ -221,12 +267,10 @@ function DashboardMetrics({ refreshTrigger }) {
                   border: "none",
                 }}
               />
+              <Legend />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                 {metrics.categoryDistribution.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={CHART_COLORS[index % CHART_COLORS.length]}
-                  />
+                  <Cell key={`cell-${index}`} fill={chartColors[index]} />
                 ))}
               </Bar>
             </BarChart>
