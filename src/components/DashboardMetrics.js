@@ -26,9 +26,12 @@ function DashboardMetrics({ refreshTrigger }) {
     lowestPrice: 0,
     completionPercentage: 0,
     categoryDistribution: [],
+    pendingByArea: [],
+    purchasedByArea: [],
   });
 
   const [isLoading, setIsLoading] = useState(true);
+  const [activeChart, setActiveChart] = useState("geral");
 
   // Função para gerar cores dinamicamente com base no número de áreas
   const generateColors = (count) => {
@@ -87,10 +90,14 @@ function DashboardMetrics({ refreshTrigger }) {
         let totalPending = 0;
         let totalPrices = [];
         let categoryMap = {};
+        let pendingByAreaMap = {};
+        let purchasedByAreaMap = {};
 
-        // Inicializa todas as áreas com zero itens
+        // Inicializa todas as áreas com zero itens e valores
         areas.forEach((area) => {
           categoryMap[area.nome] = 0;
+          pendingByAreaMap[area.nome] = 0;
+          purchasedByAreaMap[area.nome] = 0;
         });
 
         for (const item of items) {
@@ -102,25 +109,42 @@ function DashboardMetrics({ refreshTrigger }) {
             (opt) => opt.status === "pendente"
           );
 
+          const areaNome = areaMap[item.area] || "Desconhecido";
+          categoryMap[areaNome] = (categoryMap[areaNome] || 0) + 1;
+
           if (purchasedOptions.length > 0) {
-            totalPurchased += purchasedOptions[0].preco;
-          } else if (pendingOptions.length > 0) {
+            const purchasedValue = purchasedOptions[0].preco;
+            totalPurchased += purchasedValue;
+            purchasedByAreaMap[areaNome] =
+              (purchasedByAreaMap[areaNome] || 0) + purchasedValue;
+          }
+
+          if (pendingOptions.length > 0) {
             const avgPending =
               pendingOptions.reduce((sum, opt) => sum + opt.preco, 0) /
               pendingOptions.length;
             totalPending += avgPending;
+            pendingByAreaMap[areaNome] =
+              (pendingByAreaMap[areaNome] || 0) + avgPending;
           }
 
           totalPrices.push(...options.map((opt) => opt.preco));
-
-          const areaNome = areaMap[item.area] || "Desconhecido";
-          categoryMap[areaNome] = (categoryMap[areaNome] || 0) + 1;
         }
 
-        // Converte o mapa de categorias em array para o gráfico
+        // Converte os mapas para arrays para os gráficos
         const categoryDistribution = Object.entries(categoryMap)
-          .map(([key, value]) => ({ name: key, value }))
-          .sort((a, b) => b.value - a.value); // Ordena por quantidade (opcional)
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value);
+
+        const pendingByArea = Object.entries(pendingByAreaMap)
+          .map(([name, value]) => ({ name, value }))
+          .filter((item) => item.value > 0)
+          .sort((a, b) => b.value - a.value);
+
+        const purchasedByArea = Object.entries(purchasedByAreaMap)
+          .map(([name, value]) => ({ name, value }))
+          .filter((item) => item.value > 0)
+          .sort((a, b) => b.value - a.value);
 
         setMetrics({
           totalItems: items.length,
@@ -131,7 +155,9 @@ function DashboardMetrics({ refreshTrigger }) {
               ? totalPrices.reduce((sum, p) => sum + p, 0) / totalPrices.length
               : 0,
           highestPrice: Math.max(...totalPrices, 0),
-          lowestPrice: Math.min(...totalPrices, 0),
+          lowestPrice: Math.min(
+            ...(totalPrices.length > 0 ? totalPrices : [0])
+          ),
           completionPercentage:
             items.length > 0
               ? (options.filter((option) => option.status === "comprado")
@@ -140,6 +166,8 @@ function DashboardMetrics({ refreshTrigger }) {
                 100
               : 0,
           categoryDistribution,
+          pendingByArea,
+          purchasedByArea,
         });
       } catch (error) {
         console.error("Erro ao buscar métricas:", error);
@@ -159,6 +187,20 @@ function DashboardMetrics({ refreshTrigger }) {
     }).format(value);
   };
 
+  // Renderiza o tooltip para valores monetários
+  const renderMoneyTooltip = (props) => {
+    const { active, payload } = props;
+    if (active && payload && payload.length) {
+      return (
+        <div className="custom-tooltip">
+          <p className="label">{`${payload[0].name}`}</p>
+          <p className="value">{`${formatCurrency(payload[0].value)}`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   if (isLoading) {
     return (
       <div className="dashboard-metrics-container">
@@ -170,8 +212,20 @@ function DashboardMetrics({ refreshTrigger }) {
     );
   }
 
-  // Gera cores dinamicamente com base no número de categorias
-  const chartColors = generateColors(metrics.categoryDistribution.length);
+  // Gera cores dinamicamente com base no número máximo de áreas
+  const areaNames = new Set([
+    ...metrics.categoryDistribution.map((item) => item.name),
+    ...metrics.pendingByArea.map((item) => item.name),
+    ...metrics.purchasedByArea.map((item) => item.name),
+  ]);
+  const chartColors = generateColors(areaNames.size);
+
+  // Cria um mapeamento de nomes de áreas para cores
+  const areaColorMap = {};
+  let colorIndex = 0;
+  areaNames.forEach((name) => {
+    areaColorMap[name] = chartColors[colorIndex++];
+  });
 
   return (
     <div className="dashboard-metrics-container">
@@ -252,31 +306,242 @@ function DashboardMetrics({ refreshTrigger }) {
         </div>
       </div>
 
-      <div className="dashboard-metrics-chart-container">
-        <h3 className="dashboard-metrics-subtitle">📌 Distribuição por Área</h3>
-        <div className="dashboard-metrics-chart">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={metrics.categoryDistribution}>
-              <XAxis dataKey="name" stroke="#666" fontSize={12} />
-              <YAxis stroke="#666" fontSize={12} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#fff",
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                  border: "none",
-                }}
-              />
-              <Legend />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {metrics.categoryDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={chartColors[index]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+      {/* Seletores de Gráficos - Estilização Moderna */}
+      <div className="dashboard-chart-selectors">
+        <div className="dashboard-chart-selector-buttons">
+          <button
+            className={`chart-selector-btn ${
+              activeChart === "geral" ? "active" : ""
+            }`}
+            onClick={() => setActiveChart("geral")}
+          >
+            <span className="chart-selector-icon">📊</span>
+            Distribuição por Área
+          </button>
+          <button
+            className={`chart-selector-btn ${
+              activeChart === "pendentes" ? "active" : ""
+            }`}
+            onClick={() => setActiveChart("pendentes")}
+          >
+            <span className="chart-selector-icon">⏳</span>
+            Valores Pendentes por Área
+          </button>
+          <button
+            className={`chart-selector-btn ${
+              activeChart === "comprados" ? "active" : ""
+            }`}
+            onClick={() => setActiveChart("comprados")}
+          >
+            <span className="chart-selector-icon">✅</span>
+            Valores Comprados por Área
+          </button>
         </div>
       </div>
+
+      {/* Gráficos */}
+      <div className="dashboard-metrics-chart-container">
+        {activeChart === "geral" && (
+          <>
+            <h3 className="dashboard-metrics-subtitle">
+              📌 Distribuição por Área
+            </h3>
+            <div className="dashboard-metrics-chart">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={metrics.categoryDistribution}>
+                  <XAxis dataKey="name" stroke="#666" fontSize={12} />
+                  <YAxis stroke="#666" fontSize={12} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#fff",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                      border: "none",
+                    }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="value"
+                    name="Quantidade de Itens"
+                    radius={[4, 4, 0, 0]}
+                  >
+                    {metrics.categoryDistribution.map((entry) => (
+                      <Cell
+                        key={`cell-${entry.name}`}
+                        fill={areaColorMap[entry.name]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )}
+
+        {activeChart === "pendentes" && (
+          <>
+            <h3 className="dashboard-metrics-subtitle">
+              ⏳ Valores Pendentes por Área
+            </h3>
+            <div className="dashboard-metrics-chart">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={metrics.pendingByArea}>
+                  <XAxis dataKey="name" stroke="#666" fontSize={12} />
+                  <YAxis
+                    stroke="#666"
+                    fontSize={12}
+                    tickFormatter={(value) =>
+                      formatCurrency(value).replace("R$", "")
+                    }
+                  />
+                  <Tooltip
+                    content={renderMoneyTooltip}
+                    contentStyle={{
+                      backgroundColor: "#fff",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                      border: "none",
+                    }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="value"
+                    name="Valor Pendente"
+                    radius={[4, 4, 0, 0]}
+                  >
+                    {metrics.pendingByArea.map((entry) => (
+                      <Cell
+                        key={`cell-${entry.name}`}
+                        fill={areaColorMap[entry.name]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )}
+
+        {activeChart === "comprados" && (
+          <>
+            <h3 className="dashboard-metrics-subtitle">
+              ✅ Valores Comprados por Área
+            </h3>
+            <div className="dashboard-metrics-chart">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={metrics.purchasedByArea}>
+                  <XAxis dataKey="name" stroke="#666" fontSize={12} />
+                  <YAxis
+                    stroke="#666"
+                    fontSize={12}
+                    tickFormatter={(value) =>
+                      formatCurrency(value).replace("R$", "")
+                    }
+                  />
+                  <Tooltip
+                    content={renderMoneyTooltip}
+                    contentStyle={{
+                      backgroundColor: "#fff",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                      border: "none",
+                    }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="value"
+                    name="Valor Comprado"
+                    radius={[4, 4, 0, 0]}
+                  >
+                    {metrics.purchasedByArea.map((entry) => (
+                      <Cell
+                        key={`cell-${entry.name}`}
+                        fill={areaColorMap[entry.name]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* CSS para os seletores de gráficos */}
+      <style jsx>{`
+        .dashboard-chart-selectors {
+          margin: 24px 0 16px;
+        }
+
+        .dashboard-chart-selector-buttons {
+          display: flex;
+          justify-content: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .chart-selector-btn {
+          background: white;
+          border: none;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          border-radius: 12px;
+          padding: 10px 16px;
+          font-size: 14px;
+          font-weight: 500;
+          color: #555;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .chart-selector-btn:hover {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+          transform: translateY(-2px);
+        }
+
+        .chart-selector-btn.active {
+          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          color: white;
+        }
+
+        .chart-selector-icon {
+          font-size: 16px;
+        }
+
+        /* Para telas menores */
+        @media (max-width: 768px) {
+          .dashboard-chart-selector-buttons {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .chart-selector-btn {
+            padding: 12px;
+            justify-content: center;
+          }
+        }
+
+        /* Estilização adicional para o tooltip */
+        .custom-tooltip {
+          background-color: white;
+          border-radius: 8px;
+          padding: 10px 14px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          border: none;
+        }
+
+        .custom-tooltip .label {
+          font-weight: 600;
+          margin-bottom: 4px;
+          color: #333;
+        }
+
+        .custom-tooltip .value {
+          color: #555;
+        }
+      `}</style>
     </div>
   );
 }

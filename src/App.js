@@ -4,6 +4,8 @@ import AreaSelector from "./components/AreaSelector";
 import DashboardMetrics from "./components/DashboardMetrics";
 import AreaPage from "./pages/AreaPage";
 import "./App.css";
+import { HiHome } from "react-icons/hi";
+import { TbBackground } from "react-icons/tb";
 
 function App() {
   const [selectedArea, setSelectedArea] = useState(null);
@@ -15,7 +17,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Nossa Casa Nova</h1>
+        <h1>{<HiHome />} Nossa Casa Nova</h1>
       </header>
 
       <div>
