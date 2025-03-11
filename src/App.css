@@ -29,7 +29,7 @@ body {
   background-color: #fff;
 }
 
-/* Layout */
+/* App.js */
 .App {
   text-align: center;
   min-height: 100vh;
@@ -62,58 +62,6 @@ body {
   margin: auto;
   text-align: center;
   max-width: 400px;
-}
-
-.areas-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
-  justify-content: center;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.area-item {
-  padding: 10px 20px;
-  background-color: var(--primary-color);
-  color: white;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--primary-color);
-  border-radius: 8px;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.area-item:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-}
-
-.area-item:active {
-  transform: translateY(0);
-  background-color: var(--primary-dark);
-}
-
-.delete-btn {
-  background: red;
-  border: none;
-  color: white;
-  font-size: 18px;
-  cursor: pointer;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  margin-left: 10px;
-}
-
-.delete-btn:hover {
-  color: red;
-  background-color: white;
 }
 
 /* Form Styles */
@@ -181,116 +129,6 @@ button.cancel-btn:hover {
   background-color: var(--danger-dark);
 }
 
-.back-button {
-  background-color: #f0f0f0;
-  color: var(--text-dark);
-  padding: 8px 16px;
-  border-radius: var(--border-radius-sm);
-  margin-right: 15px;
-}
-
-.back-button:hover {
-  background-color: #e0e0e0;
-}
-
-/* Items List Styles */
-.items-list {
-  margin-top: 20px;
-}
-
-.items-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  margin-top: 15px;
-}
-
-.item-card {
-  background-color: white;
-  border-radius: var(--border-radius);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  text-align: left;
-  border: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-}
-
-.item-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--primary-color);
-}
-
-.item-card h4 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: var(--text-dark);
-  font-size: 1.2rem;
-}
-
-.item-footer {
-  display: flex;
-  justify-content: space-between;
-  margin-top: auto;
-  padding-top: 10px;
-  font-size: 0.9rem;
-  color: var(--text-medium);
-}
-
-.items-empty {
-  text-align: center;
-  padding: 30px;
-  background-color: var(--background-lighter);
-  border-radius: var(--border-radius);
-  margin-top: 20px;
-  border: 1px dashed var(--border-color);
-}
-
-/* Item Form Styles */
-.item-form {
-  background-color: white;
-  border-radius: var(--border-radius);
-  padding: 25px;
-  box-shadow: var(--shadow-sm);
-  margin-top: 20px;
-  border: 1px solid var(--border-color);
-}
-
-.form-group {
-  margin-bottom: 20px;
-  text-align: left;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
-  color: var(--text-dark);
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-sm);
-}
-
-.form-buttons {
-  display: flex;
-  gap: 15px;
-  margin-top: 25px;
-  justify-content: flex-end;
-}
-
-.form-buttons button {
-  padding: 12px 24px;
-  min-width: 120px;
-}
-
 /* Area Page Styles */
 .area-page {
   background-color: var(--background-light);
@@ -310,127 +148,6 @@ button.cancel-btn:hover {
   margin: 20px 0;
   display: flex;
   justify-content: center;
-}
-
-.item-details {
-  background-color: white;
-  border-radius: var(--border-radius);
-  padding: 25px;
-  box-shadow: var(--shadow-sm);
-  margin-top: 20px;
-  border: 1px solid var(--border-color);
-}
-
-/* Item Detail Styles */
-.item-detail {
-  background-color: white;
-  border-radius: var(--border-radius);
-  padding: 25px;
-  box-shadow: var(--shadow-sm);
-  text-align: left;
-}
-
-.item-detail-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 25px;
-}
-
-.item-info {
-  background-color: var(--background-lighter);
-  padding: 20px;
-  border-radius: var(--border-radius-sm);
-  margin-bottom: 25px;
-  border: 1px solid var(--border-color);
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-/* Options Table Styles */
-.options-table-container {
-  overflow-x: auto;
-  margin: 20px 0;
-  border-radius: var(--border-radius-sm);
-  border: 1px solid var(--border-color);
-}
-
-.options-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: white;
-}
-
-.options-table th,
-.options-table td {
-  padding: 15px;
-  text-align: left;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.options-table th {
-  background-color: var(--background-light);
-  font-weight: bold;
-  color: var(--text-dark);
-}
-
-.options-table tr:last-child td {
-  border-bottom: none;
-}
-
-.options-table tr:hover {
-  background-color: var(--background-lighter);
-}
-
-.option-purchased {
-  background-color: rgba(76, 175, 80, 0.1);
-}
-
-.price-column {
-  font-weight: bold;
-  white-space: nowrap;
-}
-
-.option-link {
-  color: var(--primary-color);
-  text-decoration: none;
-}
-
-.option-link:hover {
-  text-decoration: underline;
-  color: var(--primary-dark);
-}
-
-/* Status Badges */
-.status-badge {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.status-pendente {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.status-comprado {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status-button {
-  border: none;
-  border-radius: var(--border-radius-sm);
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.2s;
 }
 
 /* Responsive Adjustments */
@@ -830,8 +547,6 @@ button.cancel-btn:hover {
   font-weight: bold;
 }
 
-/* ItemList Component Styles */
-
 /* Container Principal */
 .itemlist-container {
   padding: 1.5rem;
@@ -1021,6 +736,8 @@ button.cancel-btn:hover {
 
 .item-detail-header {
   margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
 }
 
 .item-detail-back-button {
