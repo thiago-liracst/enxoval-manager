@@ -10,6 +10,7 @@ import {
   query,
   where,
   deleteDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 
 // Substitua com as suas configurações do Firebase
@@ -54,6 +55,25 @@ export const getItemsByArea = async (areaId) => {
     id: doc.id,
     ...doc.data(),
   }));
+};
+
+export const updateArea = async (areaId, areaData) => {
+  try {
+    const areaRef = doc(db, "areas", areaId);
+
+    // Adiciona timestamp de atualização
+    const updatedData = {
+      ...areaData,
+      updatedAt: serverTimestamp(),
+    };
+
+    await updateDoc(areaRef, updatedData);
+    console.log("Área atualizada com sucesso:", areaId);
+    return { success: true, areaId };
+  } catch (error) {
+    console.error("Erro ao atualizar área:", error);
+    throw error;
+  }
 };
 
 export const addItem = async (itemData) => {
