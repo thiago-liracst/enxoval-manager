@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   getAreas,
   addArea,
@@ -14,7 +14,6 @@ import {
   CardContent,
   Typography,
   Grid,
-  Fab,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -35,7 +34,7 @@ const AreaCard = styled(Card)(({ theme, bgcolor }) => ({
   cursor: "pointer",
   transition: "transform 0.2s, box-shadow 0.2s",
   backgroundColor: bgcolor || "#FFFFFF",
-  border: `2px solid ${theme.palette.primary.light}`,
+  border: `2px  ${theme.palette.primary.light}`,
   borderRadius: "12px",
   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
   "&:hover": {
@@ -265,6 +264,9 @@ function AreaSelector({ onSelectArea }) {
     color: DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)],
   });
 
+  // Referência para o componente abaixo que será renderizado
+  const contentBelowRef = useRef(null);
+
   // Carrega áreas do Firebase ao iniciar
   useEffect(() => {
     const fetchAreas = async () => {
@@ -303,6 +305,24 @@ function AreaSelector({ onSelectArea }) {
     };
 
     fetchAreas();
+  }, []);
+
+  // Cria uma div de referência para scroll se não existir
+  useEffect(() => {
+    if (!contentBelowRef.current) {
+      // Verifica se já existe um elemento com o ID específico
+      let contentBelowElement = document.getElementById("content-below");
+
+      // Se não existir, cria um novo elemento
+      if (!contentBelowElement) {
+        contentBelowElement = document.createElement("div");
+        contentBelowElement.id = "content-below";
+        // Insere após o componente AreaSelector
+        document.querySelector("#root").appendChild(contentBelowElement);
+      }
+
+      contentBelowRef.current = contentBelowElement;
+    }
   }, []);
 
   // Mostrar notificação
@@ -443,13 +463,30 @@ function AreaSelector({ onSelectArea }) {
     // se necessário para persistir a ordem das áreas
   };
 
+  // Função para lidar com a seleção de área e rolar para o conteúdo abaixo
+  const handleSelectArea = (area) => {
+    // Chama a função original de seleção passada como prop
+    onSelectArea(area);
+
+    // Aguarda um pequeno intervalo para garantir que o componente abaixo foi renderizado
+    setTimeout(() => {
+      // Rola suavemente até o componente abaixo
+      if (contentBelowRef.current) {
+        contentBelowRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }, 100);
+  };
+
   if (loading) {
     return (
       <Box
         display="flex"
         justifyContent="center"
         alignItems="center"
-        height="200px"
+        height="100%"
       >
         <CircularProgress />
         <Typography sx={{ ml: 2 }}>Carregando áreas...</Typography>
@@ -458,216 +495,233 @@ function AreaSelector({ onSelectArea }) {
   }
 
   return (
-    <Box sx={{ p: 3, minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 4 }}>
-        <Typography variant="h4">Áreas da Casa</Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<FaPlus />}
-          onClick={() => {
-            resetForm();
-            setIsDialogOpen(true);
-          }}
-        >
-          Nova Área
-        </Button>
-      </Box>
-
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="areas" direction="horizontal">
-          {(provided) => (
-            <Grid
-              container
-              spacing={3}
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              {areas.length > 0 ? (
-                areas.map((area, index) => (
-                  <Draggable key={area.id} draggableId={area.id} index={index}>
-                    {(provided, snapshot) => (
-                      <Grid
-                        item
-                        xs={12}
-                        sm={6}
-                        md={4}
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                      >
-                        <AreaCard
-                          elevation={snapshot.isDragging ? 8 : 2}
-                          onClick={() => onSelectArea(area)}
-                          bgcolor={area.color}
-                        >
-                          <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                          >
-                            <DragHandle {...provided.dragHandleProps}>
-                              <FaGripVertical style={{ color: "#1976d2" }} />
-                            </DragHandle>
-                            <Box>
-                              <Tooltip title="Editar área">
-                                <IconButton
-                                  onClick={(e) => handleEditArea(area, e)}
-                                  sx={{ color: "#1976d2" }}
-                                >
-                                  <FaPencilAlt />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Excluir área">
-                                <IconButton
-                                  onClick={(e) => handleDeleteArea(area.id, e)}
-                                  sx={{ color: "#f44336" }}
-                                >
-                                  <FaTrash />
-                                </IconButton>
-                              </Tooltip>
-                            </Box>
-                          </Box>
-                          <CardContent
-                            sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <AreaIcon>{area.icon}</AreaIcon>
-                            <Typography
-                              variant="h6"
-                              sx={{ color: "#1976d2", fontWeight: "500" }}
-                            >
-                              {area.nome}
-                            </Typography>
-                          </CardContent>
-                        </AreaCard>
-                      </Grid>
-                    )}
-                  </Draggable>
-                ))
-              ) : (
-                <Grid item xs={12}>
-                  <Box
-                    sx={{
-                      p: 4,
-                      textAlign: "center",
-                      backgroundColor: "#fff",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    <Typography variant="h6" color="text.secondary">
-                      Nenhuma área cadastrada. Clique no botão "Nova Área" para
-                      começar.
-                    </Typography>
-                  </Box>
-                </Grid>
-              )}
-              {provided.placeholder}
-            </Grid>
-          )}
-        </Droppable>
-      </DragDropContext>
-
-      <Dialog
-        open={isDialogOpen}
-        onClose={() => {
-          resetForm();
-          setIsDialogOpen(false);
-        }}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          {isEditMode ? "Editar Área" : "Adicionar Nova Área"}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Nome da Área"
-            fullWidth
-            value={newArea.nome}
-            onChange={handleAreaNameChange}
-            required
-          />
-
-          <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
-            Ícone da área:
-          </Typography>
-
-          <TextField
-            margin="dense"
-            label="Pesquisar ícone"
-            fullWidth
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-
-          <IconSelector>
-            {filteredIcons.map((icon) => (
-              <IconOption
-                key={icon}
-                selected={selectedIcon === icon}
-                onClick={() => setSelectedIcon(icon)}
-              >
-                {icon}
-              </IconOption>
-            ))}
-          </IconSelector>
-
-          <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
-            Cor do cartão:
-          </Typography>
-
-          <TextField
-            margin="dense"
-            label="Cor"
-            type="color"
-            fullWidth
-            value={newArea.color}
-            onChange={(e) => setNewArea({ ...newArea, color: e.target.value })}
-          />
-        </DialogContent>
-        <DialogActions>
+    <>
+      <Box sx={{ p: 3, minHeight: "80%", backgroundColor: "#f5f5f5" }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 4 }}>
+          <Typography variant="h4">Áreas da Casa</Typography>
           <Button
+            variant="contained"
+            color="primary"
+            startIcon={<FaPlus />}
             onClick={() => {
               resetForm();
-              setIsDialogOpen(false);
-            }}
-            sx={{
-              mr: 2,
-              "&:hover": {
-                color: "white",
-              },
+              setIsDialogOpen(true);
             }}
           >
-            Cancelar
+            Nova Área
           </Button>
-          <Button onClick={handleSaveArea} variant="contained" color="primary">
-            {isEditMode ? "Atualizar" : "Adicionar"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Box>
 
-      <Snackbar
-        open={notification.open}
-        autoHideDuration={4000}
-        onClose={handleCloseNotification}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-      >
-        <Alert
-          onClose={handleCloseNotification}
-          severity={notification.severity}
-          sx={{ width: "100%" }}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="areas" direction="horizontal">
+            {(provided) => (
+              <Grid
+                container
+                spacing={3}
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {areas.length > 0 ? (
+                  areas.map((area, index) => (
+                    <Draggable
+                      key={area.id}
+                      draggableId={area.id}
+                      index={index}
+                    >
+                      {(provided, snapshot) => (
+                        <Grid
+                          item
+                          xs={12}
+                          sm={6}
+                          md={4}
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                        >
+                          <AreaCard
+                            elevation={snapshot.isDragging ? 8 : 2}
+                            onClick={() => handleSelectArea(area)}
+                            bgcolor={area.color}
+                          >
+                            <Box
+                              display="flex"
+                              justifyContent="space-between"
+                              alignItems="center"
+                            >
+                              <DragHandle {...provided.dragHandleProps}>
+                                <FaGripVertical style={{ color: "#1976d2" }} />
+                              </DragHandle>
+                              <Box>
+                                <Tooltip title="Editar área">
+                                  <IconButton
+                                    onClick={(e) => handleEditArea(area, e)}
+                                    sx={{ color: "#1976d2" }}
+                                  >
+                                    <FaPencilAlt />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Excluir área">
+                                  <IconButton
+                                    onClick={(e) =>
+                                      handleDeleteArea(area.id, e)
+                                    }
+                                    sx={{ color: "#f44336" }}
+                                  >
+                                    <FaTrash />
+                                  </IconButton>
+                                </Tooltip>
+                              </Box>
+                            </Box>
+                            <CardContent
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <AreaIcon>{area.icon}</AreaIcon>
+                              <Typography
+                                variant="h6"
+                                sx={{ color: "#1976d2", fontWeight: "500" }}
+                              >
+                                {area.nome}
+                              </Typography>
+                            </CardContent>
+                          </AreaCard>
+                        </Grid>
+                      )}
+                    </Draggable>
+                  ))
+                ) : (
+                  <Grid item xs={12}>
+                    <Box
+                      sx={{
+                        p: 4,
+                        textAlign: "center",
+                        backgroundColor: "#fff",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <Typography variant="h6" color="text.secondary">
+                        Nenhuma área cadastrada. Clique no botão "Nova Área"
+                        para começar.
+                      </Typography>
+                    </Box>
+                  </Grid>
+                )}
+                {provided.placeholder}
+              </Grid>
+            )}
+          </Droppable>
+        </DragDropContext>
+
+        <Dialog
+          open={isDialogOpen}
+          onClose={() => {
+            resetForm();
+            setIsDialogOpen(false);
+          }}
+          maxWidth="md"
+          fullWidth
         >
-          {notification.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+          <DialogTitle>
+            {isEditMode ? "Editar Área" : "Adicionar Nova Área"}
+          </DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Nome da Área"
+              fullWidth
+              value={newArea.nome}
+              onChange={handleAreaNameChange}
+              required
+            />
+
+            <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
+              Ícone da área:
+            </Typography>
+
+            <TextField
+              margin="dense"
+              label="Pesquisar ícone"
+              fullWidth
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+
+            <IconSelector>
+              {filteredIcons.map((icon) => (
+                <IconOption
+                  key={icon}
+                  selected={selectedIcon === icon}
+                  onClick={() => setSelectedIcon(icon)}
+                >
+                  {icon}
+                </IconOption>
+              ))}
+            </IconSelector>
+
+            <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
+              Cor do cartão:
+            </Typography>
+
+            <TextField
+              margin="dense"
+              label="Cor"
+              type="color"
+              fullWidth
+              value={newArea.color}
+              onChange={(e) =>
+                setNewArea({ ...newArea, color: e.target.value })
+              }
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                resetForm();
+                setIsDialogOpen(false);
+              }}
+              sx={{
+                mr: 2,
+                "&:hover": {
+                  color: "white",
+                },
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSaveArea}
+              variant="contained"
+              color="primary"
+            >
+              {isEditMode ? "Atualizar" : "Adicionar"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Snackbar
+          open={notification.open}
+          autoHideDuration={4000}
+          onClose={handleCloseNotification}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        >
+          <Alert
+            onClose={handleCloseNotification}
+            severity={notification.severity}
+            sx={{ width: "100%" }}
+          >
+            {notification.message}
+          </Alert>
+        </Snackbar>
+      </Box>
+
+      {/* Elemento de referência para o scroll */}
+      <div id="content-below" ref={contentBelowRef}></div>
+    </>
   );
 }
 

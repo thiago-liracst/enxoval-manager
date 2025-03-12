@@ -5,6 +5,7 @@ import {
   deleteOption,
   getOptions,
 } from "../services/firebase";
+import { red } from "@mui/material/colors";
 
 function OptionList({ options, onStatusChange }) {
   const [editingOption, setEditingOption] = useState(null);
@@ -151,7 +152,7 @@ function OptionList({ options, onStatusChange }) {
                     <span className="option-card__btn-icon">✏️</span>
                   </button>
                   <button
-                    className="option-card__btn option-card__btn--icon"
+                    className="option-card__btn option-card__btn--icon-delete"
                     onClick={() => handleDeleteOption(option.id)}
                     title="Excluir"
                   >
