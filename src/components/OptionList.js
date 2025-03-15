@@ -3,9 +3,7 @@ import {
   updateOptionStatus,
   updateOption,
   deleteOption,
-  getOptions,
 } from "../services/firebase";
-import { red } from "@mui/material/colors";
 
 function OptionList({ options, onStatusChange }) {
   const [editingOption, setEditingOption] = useState(null);
@@ -54,6 +52,32 @@ function OptionList({ options, onStatusChange }) {
     }
   };
 
+  // Função para obter a classe CSS do card baseado no status
+  const getCardClass = (status) => {
+    switch (status) {
+      case "pendente":
+        return "option-card--pending";
+      case "comprado":
+        return "option-card--purchased";
+      default:
+        return "";
+    }
+  };
+
+  // Função para obter o texto do status
+  const getStatusText = (status) => {
+    switch (status) {
+      case "disponivel":
+        return "Disponível";
+      case "pendente":
+        return "Selecionado";
+      case "comprado":
+        return "Comprado";
+      default:
+        return "Desconhecido";
+    }
+  };
+
   if (options.length === 0) {
     return (
       <div className="option-list__empty">
@@ -69,9 +93,7 @@ function OptionList({ options, onStatusChange }) {
       {options.map((option) => (
         <div
           key={option.id}
-          className={`option-card ${
-            option.status === "comprado" ? "option-card--purchased" : ""
-          }`}
+          className={`option-card ${getCardClass(option.status)}`}
         >
           {editingOption === option.id ? (
             <div className="option-card__edit-mode">
@@ -140,7 +162,7 @@ function OptionList({ options, onStatusChange }) {
                   <span
                     className={`option-card__status-badge option-card__status-badge--${option.status}`}
                   >
-                    {option.status === "pendente" ? "Pendente" : "Comprado"}
+                    {getStatusText(option.status)}
                   </span>
                 </div>
                 <div className="option-card__actions-top">
@@ -184,24 +206,49 @@ function OptionList({ options, onStatusChange }) {
               </div>
 
               <div className="option-card__footer">
-                {option.status === "pendente" ? (
+                {option.status === "disponivel" && (
                   <button
-                    className="option-card__btn option-card__btn--purchase"
-                    onClick={() => handleStatusChange(option.id, "comprado")}
+                    className="option-card__btn option-card__btn--select"
+                    onClick={() => handleStatusChange(option.id, "pendente")}
                   >
-                    <span className="option-card__btn-icon">✓</span>
-                    <span className="option-card__btn-text">
-                      Marcar como comprado
-                    </span>
+                    <span className="option-card__btn-icon">🎯</span>
+                    <span className="option-card__btn-text">Selecionar</span>
                   </button>
-                ) : (
+                )}
+
+                {option.status === "pendente" && (
+                  <>
+                    <button
+                      className="option-card__btn option-card__btn--purchase"
+                      onClick={() => handleStatusChange(option.id, "comprado")}
+                    >
+                      <span className="option-card__btn-icon">✓</span>
+                      <span className="option-card__btn-text">
+                        Marcar como comprado
+                      </span>
+                    </button>
+                    <button
+                      className="option-card__btn option-card__btn--available"
+                      onClick={() =>
+                        handleStatusChange(option.id, "disponivel")
+                      }
+                    >
+                      <span className="option-card__btn-icon">↩</span>
+                      <span className="option-card__btn-text">
+                        Desistir da seleção
+                      </span>
+                    </button>
+                  </>
+                )}
+
+                {option.status === "comprado" && (
                   <button
                     className="option-card__btn option-card__btn--pending"
                     onClick={() => handleStatusChange(option.id, "pendente")}
                   >
                     <span className="option-card__btn-icon">↩</span>
                     <span className="option-card__btn-text">
-                      Marcar como pendente
+                      Desfazer compra
                     </span>
                   </button>
                 )}
@@ -210,6 +257,49 @@ function OptionList({ options, onStatusChange }) {
           )}
         </div>
       ))}
+
+      <style jsx>{`
+        /* Estilos atualizados para o componente */
+        .option-card__status-badge--disponivel {
+          background-color: #e0e0e0;
+          color: #616161;
+        }
+
+        .option-card__status-badge--pendente {
+          background-color: #fff9c4;
+          color: #f57f17;
+        }
+
+        .option-card__status-badge--comprado {
+          background-color: #c8e6c9;
+          color: #2e7d32;
+        }
+
+        .option-card--pending {
+          border-left: 4px solid #f9a825;
+        }
+
+        .option-card__btn--select {
+          background-color: #eeeeee;
+          color: #424242;
+        }
+
+        .option-card__btn--select:hover {
+          background-color: #e0e0e0;
+        }
+
+        .option-card__btn--available {
+          background-color: #e0e0e0;
+          color: #616161;
+          margin-top: 8px;
+        }
+
+        /* Ajusta o layout quando há 2 botões */
+        .option-card__footer {
+          display: flex;
+          flex-direction: column;
+        }
+      `}</style>
     </div>
   );
 }

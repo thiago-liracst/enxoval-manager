@@ -115,7 +115,7 @@ export const getAllItems = async () => {
 export const addOption = async (optionData) => {
   const optionRef = await addDoc(collection(db, "opcoes"), {
     ...optionData,
-    status: "pendente",
+    status: "disponivel", // Alterado de "pendente" para "disponivel"
     dataCadastro: new Date(),
   });
 
@@ -128,7 +128,14 @@ export const addOption = async (optionData) => {
   return optionRef;
 };
 
+// Nova função para atualizar o status de uma opção com os 3 estados possíveis
 export const updateOptionStatus = async (optionId, status) => {
+  if (!["disponivel", "pendente", "comprado"].includes(status)) {
+    throw new Error(
+      "Status inválido. Use 'disponivel', 'pendente' ou 'comprado'."
+    );
+  }
+
   const optionRef = doc(db, "opcoes", optionId);
   await updateDoc(optionRef, {
     status: status,

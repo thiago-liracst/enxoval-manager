@@ -30,6 +30,7 @@ function OptionForm({ item, onOptionAdded, onCancel }) {
         preco: parseFloat(price),
         link: link.trim(),
         opcoesCount: item.opcoesCount || 0,
+        // O status será definido como "disponivel" no firebase.js
       };
 
       await addOption(newOption);

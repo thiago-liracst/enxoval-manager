@@ -5,7 +5,6 @@ import DashboardMetrics from "./components/DashboardMetrics";
 import AreaPage from "./pages/AreaPage";
 import "./App.css";
 import { HiHome } from "react-icons/hi";
-import { TbBackground } from "react-icons/tb";
 
 function App() {
   const [selectedArea, setSelectedArea] = useState(null);

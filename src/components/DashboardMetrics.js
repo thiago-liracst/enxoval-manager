@@ -21,6 +21,7 @@ function DashboardMetrics({ refreshTrigger }) {
     totalItems: 0,
     totalPurchased: 0,
     totalPending: 0,
+    totalAvailable: 0,
     avgPricePerItem: 0,
     highestPrice: 0,
     lowestPrice: 0,
@@ -88,6 +89,7 @@ function DashboardMetrics({ refreshTrigger }) {
 
         let totalPurchased = 0;
         let totalPending = 0;
+        let totalAvailable = 0;
         let totalPrices = [];
         let categoryMap = {};
         let pendingByAreaMap = {};
@@ -108,27 +110,36 @@ function DashboardMetrics({ refreshTrigger }) {
           const pendingOptions = options.filter(
             (opt) => opt.status === "pendente"
           );
+          const availableOptions = options.filter(
+            (opt) => opt.status === "disponivel"
+          );
 
           const areaNome = areaMap[item.area] || "Desconhecido";
           categoryMap[areaNome] = (categoryMap[areaNome] || 0) + 1;
 
-          if (purchasedOptions.length > 0) {
-            const purchasedValue = purchasedOptions[0].preco;
-            totalPurchased += purchasedValue;
+          // Calculando valor dos itens comprados
+          purchasedOptions.forEach((option) => {
+            totalPurchased += option.preco;
             purchasedByAreaMap[areaNome] =
-              (purchasedByAreaMap[areaNome] || 0) + purchasedValue;
-          }
+              (purchasedByAreaMap[areaNome] || 0) + option.preco;
+          });
 
-          if (pendingOptions.length > 0) {
-            const avgPending =
-              pendingOptions.reduce((sum, opt) => sum + opt.preco, 0) /
-              pendingOptions.length;
-            totalPending += avgPending;
+          // Calculando valor dos itens pendentes (selecionados)
+          pendingOptions.forEach((option) => {
+            totalPending += option.preco;
             pendingByAreaMap[areaNome] =
-              (pendingByAreaMap[areaNome] || 0) + avgPending;
-          }
+              (pendingByAreaMap[areaNome] || 0) + option.preco;
+          });
 
-          totalPrices.push(...options.map((opt) => opt.preco));
+          // Calculando valor total dos itens disponíveis (não selecionados)
+          availableOptions.forEach((option) => {
+            totalAvailable += option.preco;
+          });
+
+          // Adicionando todos os preços para cálculos estatísticos
+          options.forEach((option) => {
+            totalPrices.push(option.preco);
+          });
         }
 
         // Converte os mapas para arrays para os gráficos
@@ -146,10 +157,19 @@ function DashboardMetrics({ refreshTrigger }) {
           .filter((item) => item.value > 0)
           .sort((a, b) => b.value - a.value);
 
+        // Calculando a porcentagem de conclusão com base nas opções marcadas como compradas
+        const totalOptions = options.length;
+        const completedOptions = options.filter(
+          (opt) => opt.status === "comprado"
+        ).length;
+        const completionPercentage =
+          totalOptions > 0 ? (completedOptions / totalOptions) * 100 : 0;
+
         setMetrics({
           totalItems: items.length,
           totalPurchased,
           totalPending,
+          totalAvailable,
           avgPricePerItem:
             totalPrices.length > 0
               ? totalPrices.reduce((sum, p) => sum + p, 0) / totalPrices.length
@@ -158,13 +178,7 @@ function DashboardMetrics({ refreshTrigger }) {
           lowestPrice: Math.min(
             ...(totalPrices.length > 0 ? totalPrices : [0])
           ),
-          completionPercentage:
-            items.length > 0
-              ? (options.filter((option) => option.status === "comprado")
-                  .length /
-                  items.length) *
-                100
-              : 0,
+          completionPercentage,
           categoryDistribution,
           pendingByArea,
           purchasedByArea,
@@ -254,9 +268,22 @@ function DashboardMetrics({ refreshTrigger }) {
 
         <div className="dashboard-metrics-card dashboard-metrics-pending">
           <div className="dashboard-metrics-card-inner">
-            <span className="dashboard-metrics-card-label">Valor Pendente</span>
+            <span className="dashboard-metrics-card-label">
+              Total Selecionado
+            </span>
             <span className="dashboard-metrics-card-value">
               {formatCurrency(metrics.totalPending)}
+            </span>
+          </div>
+        </div>
+
+        <div className="dashboard-metrics-card dashboard-metrics-available">
+          <div className="dashboard-metrics-card-inner">
+            <span className="dashboard-metrics-card-label">
+              Disponível para Escolha
+            </span>
+            <span className="dashboard-metrics-card-value">
+              {formatCurrency(metrics.totalAvailable)}
             </span>
           </div>
         </div>
@@ -325,7 +352,7 @@ function DashboardMetrics({ refreshTrigger }) {
             onClick={() => setActiveChart("pendentes")}
           >
             <span className="chart-selector-icon">⏳</span>
-            Valores Pendentes por Área
+            Valores Selecionados por Área
           </button>
           <button
             className={`chart-selector-btn ${
@@ -381,7 +408,7 @@ function DashboardMetrics({ refreshTrigger }) {
         {activeChart === "pendentes" && (
           <>
             <h3 className="dashboard-metrics-subtitle">
-              ⏳ Valores Pendentes por Área
+              ⏳ Valores Selecionados por Área
             </h3>
             <div className="dashboard-metrics-chart">
               <ResponsiveContainer width="100%" height={300}>
@@ -406,7 +433,7 @@ function DashboardMetrics({ refreshTrigger }) {
                   <Legend />
                   <Bar
                     dataKey="value"
-                    name="Valor Pendente"
+                    name="Valor Selecionado"
                     radius={[4, 4, 0, 0]}
                   >
                     {metrics.pendingByArea.map((entry) => (
@@ -540,6 +567,12 @@ function DashboardMetrics({ refreshTrigger }) {
 
         .custom-tooltip .value {
           color: #555;
+        }
+
+        /* Novos estilos para o card de itens disponíveis */
+        .dashboard-metrics-card.dashboard-metrics-available
+          .dashboard-metrics-card-inner {
+          background: linear-gradient(135deg, #64b5f6, #2196f3);
         }
       `}</style>
     </div>
