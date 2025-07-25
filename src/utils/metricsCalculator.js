@@ -36,6 +36,11 @@ export const calculateMetrics = (items, areas, allOptions) => {
   let globalTotalAvailable = 0;
   let allPrices = [];
 
+  // Novas variáveis para contagem de itens
+  let totalItemsPurchased = 0;
+  let totalItemsSelected = 0;
+  let totalValueAllItems = 0;
+
   // Processamento de todos os itens
   items.forEach((item) => {
     const itemOptions = allOptions.filter((opt) => opt.itemId === item.id);
@@ -44,10 +49,23 @@ export const calculateMetrics = (items, areas, allOptions) => {
     // Incrementa contagem de itens
     areaMetrics[areaNome].itemCount++;
 
+    // Verifica se o item tem pelo menos uma opção comprada ou selecionada
+    const hasComprado = itemOptions.some((opt) => opt.status === "comprado");
+    const hasPendente = itemOptions.some((opt) => opt.status === "pendente");
+
+    if (hasComprado) {
+      totalItemsPurchased++;
+    } else if (hasPendente) {
+      totalItemsSelected++;
+    }
+
     // Classifica e soma opções por status
     itemOptions.forEach((opt) => {
       // Garante que o preço seja um número válido
       const preco = parseFloat(opt.preco) || 0;
+
+      // Soma o valor total de todos os itens (independente do status)
+      totalValueAllItems += preco;
 
       switch (opt.status) {
         case "comprado":
@@ -79,6 +97,9 @@ export const calculateMetrics = (items, areas, allOptions) => {
     globalTotalAvailable,
     allPrices,
     allOptions,
+    totalItemsPurchased,
+    totalItemsSelected,
+    totalValueAllItems,
   };
 };
 

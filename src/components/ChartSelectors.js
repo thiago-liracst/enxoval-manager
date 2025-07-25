@@ -67,10 +67,11 @@ const ChartSelectors = ({ activeChart, setActiveChart }) => {
         .chart-selector-btn:hover {
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
           transform: translateY(-2px);
+          color: #fff;
         }
 
         .chart-selector-btn.active {
-          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          background: linear-gradient(135deg, #004191ff, #0073ffff);
           color: white;
         }
 

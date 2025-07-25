@@ -30,6 +30,9 @@ function DashboardMetrics({ refreshTrigger }) {
     categoryDistribution: [],
     pendingByArea: [],
     purchasedByArea: [],
+    totalItemsPurchased: 0,
+    totalItemsSelected: 0,
+    totalValueAllItems: 0,
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +53,9 @@ function DashboardMetrics({ refreshTrigger }) {
           globalTotalPending,
           globalTotalAvailable,
           allPrices,
-          //allOptions: options,
+          totalItemsPurchased,
+          totalItemsSelected,
+          totalValueAllItems,
         } = calculateMetrics(items, areas, allOptions);
 
         // Processa dados dos gráficos
@@ -67,6 +72,9 @@ function DashboardMetrics({ refreshTrigger }) {
           totalPurchased: globalTotalPurchased,
           totalPending: globalTotalPending,
           totalAvailable: globalTotalAvailable,
+          totalItemsPurchased,
+          totalItemsSelected,
+          totalValueAllItems,
           avgPricePerItem: priceMetrics.avgPricePerItem,
           highestPrice: priceMetrics.highestPrice,
           lowestPrice: priceMetrics.lowestPrice,
@@ -79,6 +87,9 @@ function DashboardMetrics({ refreshTrigger }) {
           totalPurchased: globalTotalPurchased,
           totalPending: globalTotalPending,
           totalAvailable: globalTotalAvailable,
+          totalItemsPurchased,
+          totalItemsSelected,
+          totalValueAllItems,
           ...priceMetrics,
           completionPercentage,
           ...chartData,

@@ -215,7 +215,15 @@ button.cancel-btn:hover {
 
 /* Estilos específicos para cada tipo de card */
 .dashboard-metrics-total {
-  border-top: 4px solid #8884d8;
+  border-top: 4px solid #2196f3;
+}
+
+.dashboard-metrics-items-purchased {
+  border-top: 4px solid #4caf50;
+}
+
+.dashboard-metrics-items-selected {
+  border-top: 4px solid #ff9900;
 }
 
 .dashboard-metrics-purchased {
@@ -224,6 +232,10 @@ button.cancel-btn:hover {
 
 .dashboard-metrics-pending {
   border-top: 4px solid #ff9800;
+}
+
+.dashboard-metrics-total-value {
+  border-top: 4px solid #2196f3;
 }
 
 .dashboard-metrics-average {

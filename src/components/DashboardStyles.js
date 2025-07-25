@@ -24,7 +24,7 @@ const DashboardStyles = () => {
 
       .dashboard-metrics-card.dashboard-metrics-available
         .dashboard-metrics-card-inner {
-        background: linear-gradient(135deg, #64b5f6, #2196f3);
+        border-top: 4px solid #ff9900;
       }
     `}</style>
   );
