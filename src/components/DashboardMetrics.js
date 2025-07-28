@@ -33,6 +33,7 @@ function DashboardMetrics({ refreshTrigger }) {
     totalItemsPurchased: 0,
     totalItemsSelected: 0,
     totalValueAllItems: 0,
+    totalOptions: 0,
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -90,6 +91,7 @@ function DashboardMetrics({ refreshTrigger }) {
           totalItemsPurchased,
           totalItemsSelected,
           totalValueAllItems,
+          totalOptions: allOptions.length,
           ...priceMetrics,
           completionPercentage,
           ...chartData,

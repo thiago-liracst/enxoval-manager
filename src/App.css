@@ -218,6 +218,10 @@ button.cancel-btn:hover {
   border-top: 4px solid #2196f3;
 }
 
+.dashboard-metrics-total-options {
+  border-top: 4px solid #9c27b0;
+}
+
 .dashboard-metrics-items-purchased {
   border-top: 4px solid #4caf50;
 }
@@ -258,7 +262,7 @@ button.cancel-btn:hover {
 .dashboard-metrics-progress-container {
   position: relative;
   height: 24px;
-  background-color: #e9ecef;
+  background-color: #8c8c8c;
   border-radius: 12px;
   overflow: hidden;
   margin-top: 8px;

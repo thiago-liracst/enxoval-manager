@@ -286,4 +286,61 @@ export const getOptions = async () => {
   }));
 };
 
+// Função para obter contagem de opções por item
+export const getOptionsCountByItemId = async (itemId) => {
+  try {
+    const optionsQuery = query(
+      collection(db, "opcoes"),
+      where("itemId", "==", itemId)
+    );
+    const optionsSnapshot = await getDocs(optionsQuery);
+    return optionsSnapshot.docs.length;
+  } catch (error) {
+    console.error("Erro ao contar opções:", error);
+    return 0;
+  }
+};
+
+// Função para obter contagem de opções para múltiplos itens
+export const getOptionsCountForItems = async (itemIds) => {
+  try {
+    const allOptions = await getOptions();
+    const optionsCountMap = {};
+
+    // Inicializa todos os itens com 0 opções
+    itemIds.forEach((itemId) => {
+      optionsCountMap[itemId] = 0;
+    });
+
+    // Conta as opções para cada item
+    allOptions.forEach((option) => {
+      if (optionsCountMap.hasOwnProperty(option.itemId)) {
+        optionsCountMap[option.itemId]++;
+      }
+    });
+
+    return optionsCountMap;
+  } catch (error) {
+    console.error("Erro ao calcular contagem de opções:", error);
+    return {};
+  }
+};
+
+// Função melhorada para obter itens de uma área com contagem de opções
+export const getItemsByAreaWithOptionsCount = async (areaId) => {
+  try {
+    const items = await getItemsByArea(areaId);
+    const itemIds = items.map((item) => item.id);
+    const optionsCount = await getOptionsCountForItems(itemIds);
+
+    return items.map((item) => ({
+      ...item,
+      optionsCount: optionsCount[item.id] || 0,
+    }));
+  } catch (error) {
+    console.error("Erro ao buscar items com contagem de opções:", error);
+    throw error;
+  }
+};
+
 export { db };

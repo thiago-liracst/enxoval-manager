@@ -15,6 +15,15 @@ const MetricsCards = ({ metrics }) => {
         </div>
       </div>
 
+      <div className="dashboard-metrics-card dashboard-metrics-total-options">
+        <div className="dashboard-metrics-card-inner">
+          <span className="dashboard-metrics-card-label">Total de Opções</span>
+          <span className="dashboard-metrics-card-value">
+            {metrics.totalOptions}
+          </span>
+        </div>
+      </div>
+
       <div className="dashboard-metrics-card dashboard-metrics-items-purchased">
         <div className="dashboard-metrics-card-inner">
           <span className="dashboard-metrics-card-label">Itens Comprados</span>
@@ -32,21 +41,6 @@ const MetricsCards = ({ metrics }) => {
           <span className="dashboard-metrics-card-value">
             {metrics.totalItemsSelected}
           </span>
-        </div>
-      </div>
-
-      <div className="dashboard-metrics-card dashboard-metrics-completion">
-        <div className="dashboard-metrics-card-inner">
-          <span className="dashboard-metrics-card-label">Conclusão</span>
-          <div className="dashboard-metrics-progress-container">
-            <div
-              className="dashboard-metrics-progress-bar"
-              style={{ width: `${metrics.completionPercentage}%` }}
-            ></div>
-            <span className="dashboard-metrics-progress-text">
-              {metrics.completionPercentage.toFixed(2)}%
-            </span>
-          </div>
         </div>
       </div>
 
@@ -93,7 +87,7 @@ const MetricsCards = ({ metrics }) => {
         </div>
       </div>
 
-      {/* Terceira linha - 3 cards de estatísticas */}
+      {/* Terceira linha - 4 cards de estatísticas */}
       <div className="dashboard-metrics-card dashboard-metrics-average">
         <div className="dashboard-metrics-card-inner">
           <span className="dashboard-metrics-card-label">
@@ -120,6 +114,21 @@ const MetricsCards = ({ metrics }) => {
           <span className="dashboard-metrics-card-value">
             {formatCurrency(metrics.lowestPrice)}
           </span>
+        </div>
+      </div>
+
+      <div className="dashboard-metrics-card dashboard-metrics-completion">
+        <div className="dashboard-metrics-card-inner">
+          <span className="dashboard-metrics-card-label">Conclusão</span>
+          <div className="dashboard-metrics-progress-container">
+            <div
+              className="dashboard-metrics-progress-bar"
+              style={{ width: `${metrics.completionPercentage}%` }}
+            ></div>
+            <span className="dashboard-metrics-progress-text">
+              {metrics.completionPercentage.toFixed(2)}%
+            </span>
+          </div>
         </div>
       </div>
     </div>

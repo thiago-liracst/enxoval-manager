@@ -78,6 +78,31 @@ function OptionList({ options, onStatusChange }) {
     }
   };
 
+  // Função para ordenar as opções
+  const sortOptions = (options) => {
+    return [...options].sort((a, b) => {
+      // Prioridade por status: comprado (1), pendente (2), disponivel (3)
+      const statusOrder = {
+        comprado: 1,
+        pendente: 2,
+        disponivel: 3,
+      };
+
+      const statusA = statusOrder[a.status] || 4;
+      const statusB = statusOrder[b.status] || 4;
+
+      // Primeiro ordena por status
+      if (statusA !== statusB) {
+        return statusA - statusB;
+      }
+
+      // Se o status for igual, ordena alfabeticamente pela descrição
+      return a.descricao
+        .toLowerCase()
+        .localeCompare(b.descricao.toLowerCase(), "pt-BR");
+    });
+  };
+
   if (options.length === 0) {
     return (
       <div className="option-list__empty">
@@ -88,9 +113,11 @@ function OptionList({ options, onStatusChange }) {
     );
   }
 
+  const sortedOptions = sortOptions(options);
+
   return (
     <div className="option-list">
-      {options.map((option) => (
+      {sortedOptions.map((option) => (
         <div
           key={option.id}
           className={`option-card ${getCardClass(option.status)}`}

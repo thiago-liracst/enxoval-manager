@@ -21,7 +21,12 @@ import {
   styled,
 } from "@mui/material";
 import { FaEdit, FaTrash, FaPlus, FaSearch } from "react-icons/fa";
-import { getItemsByArea, deleteItem, getItens } from "../services/firebase";
+import {
+  getItemsByArea,
+  deleteItem,
+  getItens,
+  getOptions,
+} from "../services/firebase";
 
 const StyledCard = styled(Card)(({ theme }) => ({
   height: "100%",
@@ -53,6 +58,32 @@ function ItemList({ area, onSelectItem, onAddItem }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [optionsCount, setOptionsCount] = useState({});
+
+  // Função para calcular a quantidade de opções para cada item
+  const calculateOptionsCount = async (itemsList) => {
+    try {
+      const allOptions = await getOptions();
+      const optionsCountMap = {};
+
+      // Inicializa todos os itens com 0 opções
+      itemsList.forEach((item) => {
+        optionsCountMap[item.id] = 0;
+      });
+
+      // Conta as opções para cada item
+      allOptions.forEach((option) => {
+        if (optionsCountMap.hasOwnProperty(option.itemId)) {
+          optionsCountMap[option.itemId]++;
+        }
+      });
+
+      return optionsCountMap;
+    } catch (error) {
+      console.error("Erro ao calcular contagem de opções:", error);
+      return {};
+    }
+  };
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -62,6 +93,11 @@ function ItemList({ area, onSelectItem, onAddItem }) {
         setLoading(true);
         const itemsData = await getItemsByArea(area.id);
         setItems(itemsData);
+
+        // Calcula a contagem de opções para todos os itens
+        const optionsCountMap = await calculateOptionsCount(itemsData);
+        setOptionsCount(optionsCountMap);
+
         setLoading(false);
       } catch (error) {
         console.error("Erro ao carregar itens:", error);
@@ -71,6 +107,19 @@ function ItemList({ area, onSelectItem, onAddItem }) {
 
     fetchItems();
   }, [area]);
+
+  // Função para atualizar a lista de itens e recalcular as opções
+  const refreshItemsAndOptions = async () => {
+    try {
+      const itemsData = await getItemsByArea(area.id);
+      setItems(itemsData);
+
+      const optionsCountMap = await calculateOptionsCount(itemsData);
+      setOptionsCount(optionsCountMap);
+    } catch (error) {
+      console.error("Erro ao atualizar itens e opções:", error);
+    }
+  };
 
   const handleDeleteClick = (itemId, event) => {
     // Evitar que o clique no botão excluir selecione o item
@@ -83,7 +132,10 @@ function ItemList({ area, onSelectItem, onAddItem }) {
   const confirmDelete = async () => {
     try {
       await deleteItem(selectedItem.id);
-      setItems(await getItens());
+
+      // Atualiza a lista de itens e recalcula as opções após a exclusão
+      await refreshItemsAndOptions();
+
       if (onSelectItem) onSelectItem();
       setDeleteConfirmOpen(false);
     } catch (error) {
@@ -91,12 +143,15 @@ function ItemList({ area, onSelectItem, onAddItem }) {
     }
   };
 
-  const filteredItems = items.filter(
-    (item) =>
-      item.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.descricao &&
-        item.descricao.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Filtrar e ordenar itens alfabeticamente por nome
+  const filteredItems = items
+    .filter(
+      (item) =>
+        item.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.descricao &&
+          item.descricao.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+    .sort((a, b) => a.nome.toLowerCase().localeCompare(b.nome.toLowerCase()));
 
   if (loading) {
     return (
@@ -218,7 +273,7 @@ function ItemList({ area, onSelectItem, onAddItem }) {
                     <Box component="span" sx={{ mr: 1, color: "#666" }}>
                       🔣
                     </Box>
-                    Opções: {item.opcoesCount || 0}
+                    Opções: {optionsCount[item.id] || 0}
                   </Typography>
                 </Box>
               </CardContent>
